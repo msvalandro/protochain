@@ -9,14 +9,18 @@ export class Block {
 
   constructor(index: number, previousHash: string, data: string) {
     this.index = index
-    this.hash = this.generateHash()
     this.previousHash = previousHash
     this.data = data
     this.timestamp = Date.now()
+    this.hash = this.generateHash()
   }
 
   static genesis() {
-    return new Block(0, '0000000000000000', 'Genesis Block')
+    return new Block(
+      0,
+      '0000000000000000000000000000000000000000000000000000000000000000',
+      'Genesis Block',
+    )
   }
 
   private generateHash() {
@@ -33,8 +37,28 @@ export class Block {
     return this.hash
   }
 
-  isValid() {
-    if (this.index < 0 || !this.previousHash || !this.data) {
+  private validateBlockData() {
+    return this.index >= 0 && this.previousHash && this.data
+  }
+
+  private validatePreviousBlockData(hash: string, index: number) {
+    return hash === this.previousHash && index === this.index - 1
+  }
+
+  private validateHash() {
+    return this.hash === this.generateHash()
+  }
+
+  isValid(previousHash: string, previousIndex: number) {
+    if (!this.validateBlockData()) {
+      return false
+    }
+
+    if (!this.validatePreviousBlockData(previousHash, previousIndex)) {
+      return false
+    }
+
+    if (!this.validateHash()) {
       return false
     }
 
