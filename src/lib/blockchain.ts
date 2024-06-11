@@ -1,5 +1,13 @@
 import { Block } from './block'
 
-const block1 = new Block(1, 'hash1')
+export class Blockchain {
+  private blocks: Block[]
 
-console.log(block1.isValid())
+  constructor() {
+    this.blocks = [Block.genesis()]
+  }
+
+  getBlocks() {
+    return this.blocks.slice()
+  }
+}

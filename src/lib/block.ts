@@ -7,6 +7,10 @@ export class Block {
     this.hash = hash
   }
 
+  static genesis() {
+    return new Block(0, '0000000000000000')
+  }
+
   isValid() {
     if (this.index < 0) {
       return false
@@ -17,5 +21,13 @@ export class Block {
     }
 
     return true
+  }
+
+  getIndex() {
+    return this.index
+  }
+
+  getHash() {
+    return this.hash
   }
 }

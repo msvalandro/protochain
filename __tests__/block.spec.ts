@@ -18,4 +18,12 @@ describe('Block tests', () => {
 
     expect(block.isValid()).toBe(false)
   })
+
+  it('should create genesis block', () => {
+    const block = Block.genesis()
+
+    expect(block.isValid()).toBe(true)
+    expect(block.getIndex()).toBe(0)
+    expect(block.getHash()).toBe('0000000000000000')
+  })
 })
