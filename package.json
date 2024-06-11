@@ -1,0 +1,19 @@
+{
+  "name": "protochain",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "compile": "tsc",
+    "dev": "tsx watch src/blockchain.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@rocketseat/eslint-config": "^2.2.2",
+    "eslint": "8",
+    "tsx": "^4.15.2",
+    "typescript": "^5.4.5"
+  }
+}
