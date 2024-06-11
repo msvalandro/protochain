@@ -12,11 +12,7 @@ export class Block {
   }
 
   isValid() {
-    if (this.index < 0) {
-      return false
-    }
-
-    if (!this.hash) {
+    if (this.index < 0 || !this.hash) {
       return false
     }
 
