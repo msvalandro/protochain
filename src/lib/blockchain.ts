@@ -20,7 +20,7 @@ export class Blockchain {
     const previousBlock = this.getLastBlock()
 
     if (!block.isValid(previousBlock.getHash(), previousBlock.getIndex())) {
-      return
+      throw new Error(`Invalid block #${block.getHash()}`)
     }
 
     this.blocks.push(block)

@@ -35,9 +35,9 @@ describe('Blockchain tests', () => {
 
     const block = new Block(1, 'invalid hash', 'data')
 
-    blockchain.addBlock(block)
-
-    expect(blockchain.getBlocks().length).toBe(1)
+    expect(() => {
+      blockchain.addBlock(block)
+    }).toThrow('Invalid block')
   })
 
   it('should be invalid if change existing block', () => {

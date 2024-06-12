@@ -7,7 +7,7 @@
     "compile": "tsc",
     "dev": "tsx watch ./src/lib/blockchain.ts",
     "start": "node ./dist/blockchain.js",
-    "test": "jest"
+    "test": "jest --silent"
   },
   "keywords": [],
   "author": "",
