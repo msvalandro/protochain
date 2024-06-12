@@ -45,7 +45,15 @@ describe('BlockchainServer tests', () => {
   })
 
   test('POST /blocks - should add block on blockchain', async () => {
-    const block = { index: 1, previousHash: 'abc', data: 'block 1' }
+    const block = {
+      index: 1,
+      previousHash: 'abc',
+      data: 'block 1',
+      nonce: 1,
+      miner: 'miner',
+      timestamp: 1,
+      hash: 'def',
+    }
     const response = await request(app.server).post('/blocks').send(block)
 
     expect(response.status).toBe(201)
@@ -62,7 +70,15 @@ describe('BlockchainServer tests', () => {
   })
 
   test('POST /blocks - should not be able to add invalid block', async () => {
-    const block = { index: -1, previousHash: 'abc', data: 'block 1' }
+    const block = {
+      index: -1,
+      previousHash: 'abc',
+      data: 'block 1',
+      nonce: 1,
+      miner: 'miner',
+      timestamp: 1,
+      hash: 'def',
+    }
     const response = await request(app.server).post('/blocks').send(block)
 
     expect(response.status).toBe(400)
@@ -70,7 +86,15 @@ describe('BlockchainServer tests', () => {
   })
 
   test('POST /blocks - should not be able to add block if internal server error', async () => {
-    const block = { index: 99, previousHash: 'abc', data: 'block 1' }
+    const block = {
+      index: 99,
+      previousHash: 'abc',
+      data: 'block 1',
+      nonce: 1,
+      miner: 'miner',
+      timestamp: 1,
+      hash: 'def',
+    }
     const response = await request(app.server).post('/blocks').send(block)
 
     expect(response.status).toBe(500)

@@ -56,9 +56,7 @@ export class Blockchain {
       this.blocks.push(block)
       this.nextIndex++
     } catch (error) {
-      throw new ValidationError(
-        `Invalid block #${block.getHash()}. Error: ${error}`,
-      )
+      throw new ValidationError(`Invalid block #${block.getHash()}. ${error}`)
     }
   }
 
@@ -75,7 +73,7 @@ export class Blockchain {
         )
       } catch (error) {
         console.error(
-          `Invalid block #${currentBlock.getHash()}. Error: ${error}`,
+          `Invalid block #${currentBlock.getHash()}. Error: ${(error as ValidationError).message}`,
         )
         return false
       }

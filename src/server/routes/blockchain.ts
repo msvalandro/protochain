@@ -42,13 +42,25 @@ export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
       index: z.number(),
       previousHash: z.string(),
       data: z.string(),
+      nonce: z.number(),
+      miner: z.string(),
+      timestamp: z.number(),
+      hash: z.string(),
     })
 
     try {
-      const { index, data, previousHash } = createBlockBodySchema.parse(
-        request.body,
-      )
-      const block = new Block({ index, data, previousHash })
+      const { index, data, previousHash, nonce, miner, timestamp, hash } =
+        createBlockBodySchema.parse(request.body)
+      const block = new Block({
+        index,
+        data,
+        previousHash,
+        nonce,
+        miner,
+        timestamp,
+        hash,
+      })
+
       blockchain.addBlock(block)
 
       return reply.status(201).send({ block })

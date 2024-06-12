@@ -24,6 +24,26 @@ describe('Block tests', () => {
     }).not.toThrow(ValidationError)
   })
 
+  it('should returns a valid block', () => {
+    const block = new Block({
+      index: 1,
+      previousHash: genesis.getHash(),
+      data: 'Block 1',
+      nonce: 0,
+      miner: '',
+      timestamp: 1,
+      hash: 'abc',
+    })
+
+    expect(block.getIndex()).toBe(1)
+    expect(block.getPreviousHash()).toBe(genesis.getHash())
+    expect(block.getData()).toBe('Block 1')
+    expect(block.getNonce()).toBe(0)
+    expect(block.getMiner()).toBe('')
+    expect(block.getTimestamp()).toBeGreaterThan(0)
+    expect(block.getHash()).not.toBe('')
+  })
+
   it('should not be valid due to index', () => {
     const block = new Block({
       index: -1,

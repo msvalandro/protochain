@@ -6,6 +6,10 @@ interface CreateBlockParams {
   index: number
   previousHash: string
   data: string
+  nonce?: number
+  miner?: string
+  timestamp?: number
+  hash?: string
 }
 
 export class Block {
@@ -14,16 +18,26 @@ export class Block {
   private previousHash: string
   private data: string
   private timestamp: number
-  private nonce = 0
-  private miner = ''
+  private nonce: number
+  private miner: string
 
-  constructor({ index, previousHash, data }: CreateBlockParams) {
+  constructor({
+    index,
+    previousHash,
+    data,
+    nonce,
+    miner,
+    timestamp,
+    hash,
+  }: CreateBlockParams) {
     this.index = index
     this.previousHash = previousHash
     this.data = data
+    this.nonce = nonce ?? 0
+    this.miner = miner ?? ''
 
-    this.timestamp = Date.now()
-    this.hash = this.generateHash()
+    this.timestamp = timestamp ?? Date.now()
+    this.hash = hash ?? this.generateHash()
   }
 
   static genesis(): Block {
@@ -52,6 +66,26 @@ export class Block {
 
   getIndex(): number {
     return this.index
+  }
+
+  getPreviousHash(): string {
+    return this.previousHash
+  }
+
+  getData(): string {
+    return this.data
+  }
+
+  getNonce(): number {
+    return this.nonce
+  }
+
+  getMiner(): string {
+    return this.miner
+  }
+
+  getTimestamp(): number {
+    return this.timestamp
   }
 
   getHash(): string {
