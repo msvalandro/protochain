@@ -81,4 +81,10 @@ describe('Blockchain tests', () => {
 
     expect(block).toBe(genesis)
   })
+
+  it('should return next block', () => {
+    const blockchain = new Blockchain()
+
+    expect(blockchain.getNextBlock().index).toBe(1)
+  })
 })

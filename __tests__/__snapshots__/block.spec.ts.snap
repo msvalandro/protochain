@@ -1,5 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Block tests should be invalid if block not mined: Block not minaaaaed 1`] = `"Block not mined"`;
-
-exports[`Block tests should be invalid if block not mined: Block not mined 1`] = `"Block not mined"`;

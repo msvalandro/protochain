@@ -1,10 +1,12 @@
 import { Block } from './block'
+import { BlockInfo } from './block-info'
 import { ValidationError } from './validation-error'
 
 export class Blockchain {
   private blocks: Block[]
   private nextIndex = 1
   static readonly DIFFICULTY_FACTOR = 5
+  static readonly MAX_DIFFICULTY = 62
 
   constructor() {
     this.blocks = [Block.genesis()]
@@ -16,6 +18,21 @@ export class Blockchain {
 
   getLastBlock(): Block {
     return this.blocks[this.blocks.length - 1]
+  }
+
+  private getFeePerTx(): number {
+    return 1
+  }
+
+  getNextBlock(): BlockInfo {
+    return {
+      index: this.nextIndex,
+      previousHash: this.getLastBlock().getHash(),
+      data: new Date().toISOString(),
+      difficulty: this.getDifficulty(),
+      maxDifficulty: Blockchain.MAX_DIFFICULTY,
+      feePerTx: this.getFeePerTx(),
+    }
   }
 
   getBlocks(): Block[] {
