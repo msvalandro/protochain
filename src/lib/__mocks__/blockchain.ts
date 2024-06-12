@@ -26,6 +26,10 @@ export class Blockchain {
       throw new ValidationError('Invalid mocked block')
     }
 
+    if (block.getIndex() === 99) {
+      throw new Error('Mocked internal server error')
+    }
+
     this.blocks.push(block)
     this.nextIndex++
   }

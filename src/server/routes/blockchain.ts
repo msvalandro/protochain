@@ -45,7 +45,7 @@ export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
       const block = new Block({ index, data, previousHash })
       blockchain.addBlock(block)
 
-      return reply.status(201).send(block)
+      return reply.status(201).send({ block })
     } catch (error) {
       if (error instanceof ZodError) {
         return reply.status(400).send({
