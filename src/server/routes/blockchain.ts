@@ -16,6 +16,12 @@ export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
     }
   })
 
+  app.get('/blocks/next', () => {
+    const nextBlock = blockchain.getNextBlock()
+
+    return { block: nextBlock }
+  })
+
   app.get('/blocks/:indexOrHash', (request, reply) => {
     const getBlockParamsSchema = z.object({ indexOrHash: z.string() })
     const { indexOrHash } = getBlockParamsSchema.parse(request.params)

@@ -8,7 +8,8 @@
     "dev": "tsx watch ./src/lib/blockchain.ts",
     "dev:server": "tsx watch ./src/server/blockchain-server.ts",
     "start": "node ./dist/blockchain.js",
-    "test": "jest --silent --NODE_ENV=test"
+    "test": "jest --silent --NODE_ENV=test",
+    "miner": "tsx watch ./src/client/miner-client.ts"
   },
   "keywords": [],
   "author": "",
@@ -28,6 +29,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "axios": "^1.7.2",
     "crypto-js": "^4.2.0",
     "dotenv": "^16.4.5",
     "fastify": "^4.27.0",

@@ -1,3 +1,4 @@
+import { BlockInfo } from '../block-info'
 import { ValidationError } from '../validation-error'
 import { Block } from './block'
 
@@ -36,5 +37,12 @@ export class Blockchain {
 
   isValid(): boolean {
     return true
+  }
+
+  getNextBlock(): BlockInfo {
+    return {
+      index: this.nextIndex,
+      previousHash: this.getLastBlock().getHash(),
+    } as BlockInfo
   }
 }
