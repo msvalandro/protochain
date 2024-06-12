@@ -27,12 +27,16 @@ export class Block {
   }
 
   static genesis(): Block {
-    return new Block({
+    const block = new Block({
       index: 0,
       previousHash:
         '0000000000000000000000000000000000000000000000000000000000000000',
       data: 'Genesis Block',
     })
+
+    block.mine(0, 'genesis')
+
+    return block
   }
 
   private generateHash(): string {

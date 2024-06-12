@@ -2,6 +2,8 @@ import { Block } from '../src/lib/block'
 import { ValidationError } from '../src/lib/validation-error'
 
 describe('Block tests', () => {
+  const exampleDifficulty = 0
+  const exampleMiner = 'miner'
   let genesis: Block
 
   beforeAll(() => {
@@ -15,8 +17,10 @@ describe('Block tests', () => {
       data: 'Block 1',
     })
 
+    block.mine(exampleDifficulty, exampleMiner)
+
     expect(() => {
-      block.validate(genesis.getHash(), genesis.getIndex())
+      block.validate(genesis.getHash(), genesis.getIndex(), exampleDifficulty)
     }).not.toThrow(ValidationError)
   })
 
@@ -28,16 +32,16 @@ describe('Block tests', () => {
     })
 
     expect(() => {
-      block.validate(genesis.getHash(), genesis.getIndex())
-    }).toThrow(ValidationError)
+      block.validate(genesis.getHash(), genesis.getIndex(), exampleDifficulty)
+    }).toThrow('Invalid block index')
   })
 
   it('should not be valid due to previous hash', () => {
     const block = new Block({ index: 1, previousHash: '', data: 'Block 1' })
 
     expect(() => {
-      block.validate(genesis.getHash(), genesis.getIndex())
-    }).toThrow(ValidationError)
+      block.validate(genesis.getHash(), genesis.getIndex(), exampleDifficulty)
+    }).toThrow('Invalid previous block hash')
   })
 
   it('should not be valid due to data', () => {
@@ -48,8 +52,8 @@ describe('Block tests', () => {
     })
 
     expect(() => {
-      block.validate(genesis.getHash(), genesis.getIndex())
-    }).toThrow(ValidationError)
+      block.validate(genesis.getHash(), genesis.getIndex(), exampleDifficulty)
+    }).toThrow('Invalid block data')
   })
 
   it('should not be valid due to timestamp', () => {
@@ -63,8 +67,8 @@ describe('Block tests', () => {
     block['timestamp'] = 0
 
     expect(() => {
-      block.validate(genesis.getHash(), genesis.getIndex())
-    }).toThrow(ValidationError)
+      block.validate(genesis.getHash(), genesis.getIndex(), exampleDifficulty)
+    }).toThrow('Invalid block timestamp')
   })
 
   it('should create genesis block', () => {
@@ -74,6 +78,7 @@ describe('Block tests', () => {
       block.validate(
         '0000000000000000000000000000000000000000000000000000000000000000',
         -1,
+        exampleDifficulty,
       )
     }).not.toThrow(ValidationError)
     expect(block.getIndex()).toBe(0)
@@ -87,11 +92,25 @@ describe('Block tests', () => {
       data: 'Block 1',
     })
 
+    block.mine(exampleDifficulty, exampleMiner)
+
     // eslint-disable-next-line dot-notation
     block['hash'] = 'invalid'
 
     expect(() => {
-      block.validate(genesis.getHash(), genesis.getIndex())
-    }).toThrow(ValidationError)
+      block.validate(genesis.getHash(), genesis.getIndex(), exampleDifficulty)
+    }).toThrow('Invalid block hash')
+  })
+
+  it('should be invalid if block not mined', () => {
+    const block = new Block({
+      index: 1,
+      previousHash: genesis.getHash(),
+      data: 'Block 1',
+    })
+
+    expect(() => {
+      block.validate(genesis.getHash(), genesis.getIndex(), exampleDifficulty)
+    }).toThrow('Block not mined')
   })
 })
