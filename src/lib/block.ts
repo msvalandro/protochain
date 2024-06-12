@@ -15,7 +15,7 @@ export class Block {
     this.hash = this.generateHash()
   }
 
-  static genesis() {
+  static genesis(): Block {
     return new Block(
       0,
       '0000000000000000000000000000000000000000000000000000000000000000',
@@ -23,45 +23,52 @@ export class Block {
     )
   }
 
-  private generateHash() {
+  private generateHash(): string {
     return sha256(
       this.index + this.data + this.timestamp + this.previousHash,
     ).toString()
   }
 
-  getIndex() {
+  getIndex(): number {
     return this.index
   }
 
-  getHash() {
+  getHash(): string {
     return this.hash
   }
 
-  private validateBlockData() {
-    return this.index >= 0 && this.previousHash && this.data
+  private validateData(): void {
+    if (!this.data) {
+      throw new Error('Invalid data')
+    }
   }
 
-  private validatePreviousBlockData(hash: string, index: number) {
-    return hash === this.previousHash && index === this.index - 1
+  private validatePreviousBlock(hash: string, index: number): void {
+    if (hash !== this.previousHash) {
+      throw new Error('Invalid previous hash')
+    }
+
+    if (index !== this.index - 1) {
+      throw new Error('Invalid index')
+    }
   }
 
-  private validateHash() {
-    return this.hash === this.generateHash()
+  private validateHash(): void {
+    if (this.hash !== this.generateHash()) {
+      throw new Error('Invalid hash')
+    }
   }
 
-  isValid(previousHash: string, previousIndex: number) {
-    if (!this.validateBlockData()) {
+  isValid(previousHash: string, previousIndex: number): boolean {
+    try {
+      this.validateData()
+      this.validatePreviousBlock(previousHash, previousIndex)
+      this.validateHash()
+
+      return true
+    } catch (error) {
+      console.error((error as Error).message)
       return false
     }
-
-    if (!this.validatePreviousBlockData(previousHash, previousIndex)) {
-      return false
-    }
-
-    if (!this.validateHash()) {
-      return false
-    }
-
-    return true
   }
 }

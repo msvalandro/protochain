@@ -8,28 +8,26 @@ export class Blockchain {
     this.blocks = [Block.genesis()]
   }
 
-  getBlocks() {
+  getBlocks(): Block[] {
     return this.blocks.slice()
   }
 
-  private getLastBlock() {
+  private getLastBlock(): Block {
     return this.blocks[this.blocks.length - 1]
   }
 
-  addBlock(block: Block) {
+  addBlock(block: Block): void {
     const previousBlock = this.getLastBlock()
 
     if (!block.isValid(previousBlock.getHash(), previousBlock.getIndex())) {
-      return false
+      return
     }
 
     this.blocks.push(block)
     this.nextIndex++
-
-    return true
   }
 
-  isValid() {
+  isValid(): boolean {
     for (let i = this.blocks.length - 1; i > 0; i--) {
       const currentBlock = this.blocks[i]
       const previousBlock = this.blocks[i - 1]
