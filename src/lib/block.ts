@@ -1,5 +1,13 @@
 import sha256 from 'crypto-js/sha256'
 
+import { ValidationError } from './validation-error'
+
+interface CreateBlockParams {
+  index: number
+  previousHash: string
+  data: string
+}
+
 export class Block {
   private index: number
   private hash: string
@@ -7,7 +15,7 @@ export class Block {
   private data: string
   private timestamp: number
 
-  constructor(index: number, previousHash: string, data: string) {
+  constructor({ index, previousHash, data }: CreateBlockParams) {
     this.index = index
     this.previousHash = previousHash
     this.data = data
@@ -16,11 +24,12 @@ export class Block {
   }
 
   static genesis(): Block {
-    return new Block(
-      0,
-      '0000000000000000000000000000000000000000000000000000000000000000',
-      'Genesis Block',
-    )
+    return new Block({
+      index: 0,
+      previousHash:
+        '0000000000000000000000000000000000000000000000000000000000000000',
+      data: 'Genesis Block',
+    })
   }
 
   private generateHash(): string {
@@ -39,43 +48,41 @@ export class Block {
 
   private validateData(): void {
     if (!this.data) {
-      throw new Error('Invalid block data')
+      throw new ValidationError('Invalid block data')
     }
   }
 
   private validateTimestamp(): void {
     if (this.timestamp < 1) {
-      throw new Error('Invalid block timestamp')
+      throw new ValidationError('Invalid block timestamp')
     }
   }
 
   private validatePreviousBlock(hash: string, index: number): void {
     if (hash !== this.previousHash) {
-      throw new Error('Invalid previous block hash')
+      throw new ValidationError('Invalid previous block hash')
     }
 
     if (index !== this.index - 1) {
-      throw new Error('Invalid block index')
+      throw new ValidationError('Invalid block index')
     }
   }
 
   private validateHash(): void {
     if (this.hash !== this.generateHash()) {
-      throw new Error('Invalid block hash')
+      throw new ValidationError('Invalid block hash')
     }
   }
 
-  isValid(previousHash: string, previousIndex: number): boolean {
+  validate(previousHash: string, previousIndex: number): void {
     try {
       this.validateData()
       this.validateTimestamp()
       this.validatePreviousBlock(previousHash, previousIndex)
       this.validateHash()
-
-      return true
     } catch (error) {
-      console.error((error as Error).message)
-      return false
+      console.error((error as ValidationError).message)
+      throw error
     }
   }
 }

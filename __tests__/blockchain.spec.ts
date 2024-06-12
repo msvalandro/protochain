@@ -12,7 +12,11 @@ describe('Blockchain tests', () => {
     const blockchain = new Blockchain()
 
     const previousBlock = blockchain.getBlocks()[0]
-    const block = new Block(1, previousBlock.getHash(), 'data')
+    const block = new Block({
+      index: 1,
+      previousHash: previousBlock.getHash(),
+      data: 'data',
+    })
 
     blockchain.addBlock(block)
 
@@ -23,7 +27,11 @@ describe('Blockchain tests', () => {
     const blockchain = new Blockchain()
 
     const previousBlock = blockchain.getBlocks()[0]
-    const block = new Block(1, previousBlock.getHash(), 'data')
+    const block = new Block({
+      index: 1,
+      previousHash: previousBlock.getHash(),
+      data: 'data',
+    })
 
     blockchain.addBlock(block)
 
@@ -33,7 +41,11 @@ describe('Blockchain tests', () => {
   it('should not be able to add invalid block', () => {
     const blockchain = new Blockchain()
 
-    const block = new Block(1, 'invalid hash', 'data')
+    const block = new Block({
+      index: 1,
+      previousHash: 'invalid hash',
+      data: 'data',
+    })
 
     expect(() => {
       blockchain.addBlock(block)
@@ -44,7 +56,11 @@ describe('Blockchain tests', () => {
     const blockchain = new Blockchain()
 
     const previousBlock = blockchain.getBlocks()[0]
-    const block = new Block(1, previousBlock.getHash(), 'data')
+    const block = new Block({
+      index: 1,
+      previousHash: previousBlock.getHash(),
+      data: 'data',
+    })
 
     blockchain.addBlock(block)
 

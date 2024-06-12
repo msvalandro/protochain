@@ -1,4 +1,5 @@
 import { Block } from './block'
+import { ValidationError } from './validation-error'
 
 export class Blockchain {
   private blocks: Block[]
@@ -21,14 +22,18 @@ export class Blockchain {
   }
 
   addBlock(block: Block): void {
-    const previousBlock = this.getLastBlock()
+    try {
+      const previousBlock = this.getLastBlock()
 
-    if (!block.isValid(previousBlock.getHash(), previousBlock.getIndex())) {
-      throw new Error(`Invalid block #${block.getHash()}`)
+      block.validate(previousBlock.getHash(), previousBlock.getIndex())
+
+      this.blocks.push(block)
+      this.nextIndex++
+    } catch (error) {
+      throw new ValidationError(
+        `Invalid block #${block.getHash()}. Error: ${error}`,
+      )
     }
-
-    this.blocks.push(block)
-    this.nextIndex++
   }
 
   isValid(): boolean {
@@ -36,10 +41,12 @@ export class Blockchain {
       const currentBlock = this.blocks[i]
       const previousBlock = this.blocks[i - 1]
 
-      if (
-        !currentBlock.isValid(previousBlock.getHash(), previousBlock.getIndex())
-      ) {
-        console.error(`Invalid block #${currentBlock.getHash()}`)
+      try {
+        currentBlock.validate(previousBlock.getHash(), previousBlock.getIndex())
+      } catch (error) {
+        console.error(
+          `Invalid block #${currentBlock.getHash()}. Error: ${error}`,
+        )
         return false
       }
     }

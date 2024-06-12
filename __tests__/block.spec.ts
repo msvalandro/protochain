@@ -1,4 +1,5 @@
 import { Block } from '../src/lib/block'
+import { ValidationError } from '../src/lib/validation-error'
 
 describe('Block tests', () => {
   let genesis: Block
@@ -8,47 +9,73 @@ describe('Block tests', () => {
   })
 
   it('should be valid', () => {
-    const block = new Block(1, genesis.getHash(), 'Block 1')
+    const block = new Block({
+      index: 1,
+      previousHash: genesis.getHash(),
+      data: 'Block 1',
+    })
 
-    expect(block.isValid(genesis.getHash(), genesis.getIndex())).toBe(true)
+    expect(() => {
+      block.validate(genesis.getHash(), genesis.getIndex())
+    }).not.toThrow(ValidationError)
   })
 
   it('should not be valid due to index', () => {
-    const block = new Block(-1, genesis.getHash(), 'Block 1')
+    const block = new Block({
+      index: -1,
+      previousHash: genesis.getHash(),
+      data: 'Block 1',
+    })
 
-    expect(block.isValid(genesis.getHash(), genesis.getIndex())).toBe(false)
+    expect(() => {
+      block.validate(genesis.getHash(), genesis.getIndex())
+    }).toThrow(ValidationError)
   })
 
   it('should not be valid due to previous hash', () => {
-    const block = new Block(1, '', 'Block 1')
+    const block = new Block({ index: 1, previousHash: '', data: 'Block 1' })
 
-    expect(block.isValid(genesis.getHash(), genesis.getIndex())).toBe(false)
+    expect(() => {
+      block.validate(genesis.getHash(), genesis.getIndex())
+    }).toThrow(ValidationError)
   })
 
   it('should not be valid due to data', () => {
-    const block = new Block(1, genesis.getHash(), '')
+    const block = new Block({
+      index: 1,
+      previousHash: genesis.getHash(),
+      data: '',
+    })
 
-    expect(block.isValid(genesis.getHash(), genesis.getIndex())).toBe(false)
+    expect(() => {
+      block.validate(genesis.getHash(), genesis.getIndex())
+    }).toThrow(ValidationError)
   })
 
   it('should not be valid due to timestamp', () => {
-    const block = new Block(1, genesis.getHash(), 'Block 1')
+    const block = new Block({
+      index: 1,
+      previousHash: genesis.getHash(),
+      data: 'Block 1',
+    })
 
     // eslint-disable-next-line dot-notation
     block['timestamp'] = 0
 
-    expect(block.isValid(genesis.getHash(), genesis.getIndex())).toBe(false)
+    expect(() => {
+      block.validate(genesis.getHash(), genesis.getIndex())
+    }).toThrow(ValidationError)
   })
 
   it('should create genesis block', () => {
     const block = Block.genesis()
 
-    expect(
-      block.isValid(
+    expect(() => {
+      block.validate(
         '0000000000000000000000000000000000000000000000000000000000000000',
         -1,
-      ),
-    ).toBe(true)
+      )
+    }).not.toThrow(ValidationError)
     expect(block.getIndex()).toBe(0)
     expect(block.getHash()).toBeTruthy()
   })
