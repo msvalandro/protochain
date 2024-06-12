@@ -79,4 +79,19 @@ describe('Block tests', () => {
     expect(block.getIndex()).toBe(0)
     expect(block.getHash()).toBeTruthy()
   })
+
+  it('should be invalid if change existing hash', () => {
+    const block = new Block({
+      index: 1,
+      previousHash: genesis.getHash(),
+      data: 'Block 1',
+    })
+
+    // eslint-disable-next-line dot-notation
+    block['hash'] = 'invalid'
+
+    expect(() => {
+      block.validate(genesis.getHash(), genesis.getIndex())
+    }).toThrow(ValidationError)
+  })
 })

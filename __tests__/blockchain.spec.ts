@@ -1,6 +1,8 @@
 import { Block } from '../src/lib/block'
 import { Blockchain } from '../src/lib/blockchain'
 
+jest.mock('../src/lib/block')
+
 describe('Blockchain tests', () => {
   it('should has genesis block', () => {
     const blockchain = new Blockchain()
@@ -42,8 +44,8 @@ describe('Blockchain tests', () => {
     const blockchain = new Blockchain()
 
     const block = new Block({
-      index: 1,
-      previousHash: 'invalid hash',
+      index: -1,
+      previousHash: 'hash',
       data: 'data',
     })
 
@@ -65,7 +67,7 @@ describe('Blockchain tests', () => {
     blockchain.addBlock(block)
 
     // eslint-disable-next-line dot-notation
-    block['data'] = 'changed data'
+    block['index'] = -1
 
     expect(blockchain.isValid()).toBe(false)
   })
