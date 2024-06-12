@@ -14,11 +14,14 @@ export class Block {
   private previousHash: string
   private data: string
   private timestamp: number
+  private nonce = 0
+  private miner = ''
 
   constructor({ index, previousHash, data }: CreateBlockParams) {
     this.index = index
     this.previousHash = previousHash
     this.data = data
+
     this.timestamp = Date.now()
     this.hash = this.generateHash()
   }
@@ -34,7 +37,12 @@ export class Block {
 
   private generateHash(): string {
     return sha256(
-      this.index + this.data + this.timestamp + this.previousHash,
+      this.index +
+        this.data +
+        this.timestamp +
+        this.previousHash +
+        this.nonce +
+        this.miner,
     ).toString()
   }
 
@@ -68,21 +76,45 @@ export class Block {
     }
   }
 
-  private validateHash(): void {
-    if (this.hash !== this.generateHash()) {
+  private validateHash(difficulty: number): void {
+    const prefix = '0'.repeat(difficulty)
+
+    if (this.hash !== this.generateHash() || !this.hash.startsWith(prefix)) {
       throw new ValidationError('Invalid block hash')
     }
   }
 
-  validate(previousHash: string, previousIndex: number): void {
+  private validateMining(): void {
+    if (!this.nonce || !this.miner) {
+      throw new ValidationError('Block not mined')
+    }
+  }
+
+  validate(
+    previousHash: string,
+    previousIndex: number,
+    difficulty: number,
+  ): void {
     try {
       this.validateData()
       this.validateTimestamp()
       this.validatePreviousBlock(previousHash, previousIndex)
-      this.validateHash()
+      this.validateMining()
+
+      this.validateHash(difficulty)
     } catch (error) {
       console.error((error as ValidationError).message)
       throw error
     }
+  }
+
+  mine(difficulty: number, miner: string): void {
+    this.miner = miner
+    const prefix = '0'.repeat(difficulty)
+
+    do {
+      this.nonce++
+      this.hash = this.generateHash()
+    } while (!this.hash.startsWith(prefix))
   }
 }
