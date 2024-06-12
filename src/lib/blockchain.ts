@@ -35,6 +35,7 @@ export class Blockchain {
       if (
         !currentBlock.isValid(previousBlock.getHash(), previousBlock.getIndex())
       ) {
+        console.error(`Invalid block #${currentBlock.getHash()}`)
         return false
       }
     }

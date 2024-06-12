@@ -39,29 +39,36 @@ export class Block {
 
   private validateData(): void {
     if (!this.data) {
-      throw new Error('Invalid data')
+      throw new Error('Invalid block data')
+    }
+  }
+
+  private validateTimestamp(): void {
+    if (this.timestamp < 1) {
+      throw new Error('Invalid block timestamp')
     }
   }
 
   private validatePreviousBlock(hash: string, index: number): void {
     if (hash !== this.previousHash) {
-      throw new Error('Invalid previous hash')
+      throw new Error('Invalid previous block hash')
     }
 
     if (index !== this.index - 1) {
-      throw new Error('Invalid index')
+      throw new Error('Invalid block index')
     }
   }
 
   private validateHash(): void {
     if (this.hash !== this.generateHash()) {
-      throw new Error('Invalid hash')
+      throw new Error('Invalid block hash')
     }
   }
 
   isValid(previousHash: string, previousIndex: number): boolean {
     try {
       this.validateData()
+      this.validateTimestamp()
       this.validatePreviousBlock(previousHash, previousIndex)
       this.validateHash()
 

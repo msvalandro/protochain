@@ -31,6 +31,15 @@ describe('Block tests', () => {
     expect(block.isValid(genesis.getHash(), genesis.getIndex())).toBe(false)
   })
 
+  it('should not be valid due to timestamp', () => {
+    const block = new Block(1, genesis.getHash(), 'Block 1')
+
+    // eslint-disable-next-line dot-notation
+    block['timestamp'] = 0
+
+    expect(block.isValid(genesis.getHash(), genesis.getIndex())).toBe(false)
+  })
+
   it('should create genesis block', () => {
     const block = Block.genesis()
 
