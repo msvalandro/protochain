@@ -8,12 +8,16 @@ export class Blockchain {
     this.blocks = [Block.genesis()]
   }
 
-  getBlocks(): Block[] {
-    return this.blocks.slice()
+  getBlock(hash: string): Block | undefined {
+    return this.blocks.find((block) => block.getHash() === hash)
   }
 
-  private getLastBlock(): Block {
+  getLastBlock(): Block {
     return this.blocks[this.blocks.length - 1]
+  }
+
+  getBlocks(): Block[] {
+    return this.blocks.slice()
   }
 
   addBlock(block: Block): void {

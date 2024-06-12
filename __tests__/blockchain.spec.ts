@@ -53,4 +53,14 @@ describe('Blockchain tests', () => {
 
     expect(blockchain.isValid()).toBe(false)
   })
+
+  it('should return existing block', () => {
+    const blockchain = new Blockchain()
+
+    const genesis = blockchain.getBlocks()[0]
+
+    const block = blockchain.getBlock(genesis.getHash())
+
+    expect(block).toBe(genesis)
+  })
 })
