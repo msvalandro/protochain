@@ -81,4 +81,51 @@ export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
       return reply.status(500).send()
     }
   })
+
+  app.get('/transactions/:hash?', (request) => {
+    const getTransactionParamsSchema = z.object({
+      hash: z.optional(z.string()),
+    })
+    const { hash } = getTransactionParamsSchema.parse(request.params)
+
+    if (hash) {
+      return { transaction: blockchain.getTransaction(hash) }
+    }
+
+    return {
+      next: blockchain.getMempool().slice(0, Blockchain.TX_PER_BLOCK),
+      total: blockchain.getMempool().length,
+    }
+  })
+
+  app.post('/transactions', (request, reply) => {
+    const createTransactionBodySchema = z.object({
+      // type: z.enum([TransactionType.FEE, TransactionType.REGULAR]),
+      data: z.string(),
+      // timestamp: z.number(),
+      // hash: z.string(),
+    })
+
+    try {
+      const { data } = createTransactionBodySchema.parse(request.body)
+      const transaction = new Transaction({ data })
+
+      blockchain.addTransaction(transaction)
+
+      return reply.status(201).send({ transaction })
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return reply.status(400).send({
+          message: 'Could not create the transaction with the provided data',
+          errors: error.errors,
+        })
+      }
+
+      if (error instanceof ValidationError) {
+        return reply.status(400).send({ message: error.message })
+      }
+
+      return reply.status(500).send()
+    }
+  })
 }

@@ -1,6 +1,7 @@
 import { Block } from './block'
 import { BlockInfo } from './block-info'
 import { Transaction } from './transaction'
+import { TransactionSearch } from './transaction-search'
 import { TransactionType } from './transaction-type'
 import { ValidationError } from './validation-error'
 
@@ -47,6 +48,42 @@ export class Blockchain {
 
   getBlocks(): Block[] {
     return this.blocks.slice()
+  }
+
+  getMempool(): Transaction[] {
+    return this.mempool.slice()
+  }
+
+  getTransaction(hash: string): TransactionSearch {
+    const mempoolIndex = this.mempool.findIndex(
+      (transaction) => transaction.getHash() === hash,
+    )
+
+    if (mempoolIndex !== -1) {
+      return {
+        transaction: this.mempool[mempoolIndex],
+        mempoolIndex,
+        blockIndex: -1,
+      }
+    }
+
+    const blockIndex = this.blocks.findIndex((block) =>
+      block.hasTransaction(hash),
+    )
+
+    if (blockIndex !== -1) {
+      return {
+        transaction: this.blocks[blockIndex].getTransaction(hash),
+        mempoolIndex: -1,
+        blockIndex,
+      }
+    }
+
+    return {
+      transaction: undefined,
+      mempoolIndex: -1,
+      blockIndex: -1,
+    }
   }
 
   getDifficulty(): number {

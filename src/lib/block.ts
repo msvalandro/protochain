@@ -101,6 +101,14 @@ export class Block {
     return this.hash
   }
 
+  getTransaction(hash: string): Transaction | undefined {
+    return this.transactions.find((tx) => tx.getHash() === hash)
+  }
+
+  hasTransaction(hash: string): boolean {
+    return this.transactions.some((tx) => tx.getHash() === hash)
+  }
+
   private validateTransactions(): void {
     const fees = this.transactions.filter(
       (tx) => tx.getType() === TransactionType.FEE,
@@ -173,9 +181,5 @@ export class Block {
       this.nonce++
       this.hash = this.generateHash()
     } while (!this.hash.startsWith(prefix))
-  }
-
-  hasTransaction(hash: string): boolean {
-    return this.transactions.some((tx) => tx.getHash() === hash)
   }
 }
