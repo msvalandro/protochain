@@ -1,7 +1,9 @@
+import { Transaction } from './transaction'
+
 export interface BlockInfo {
   index: number
   previousHash: string
-  data: string
+  transactions: Transaction[]
   difficulty: number
   maxDifficulty: number
   feePerTx: number

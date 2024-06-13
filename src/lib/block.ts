@@ -1,11 +1,13 @@
 import sha256 from 'crypto-js/sha256'
 
+import { Transaction } from './transaction'
+import { TransactionType } from './transaction-type'
 import { ValidationError } from './validation-error'
 
 interface CreateBlockParams {
   index: number
   previousHash: string
-  data: string
+  transactions: Transaction[]
   nonce?: number
   miner?: string
   timestamp?: number
@@ -16,7 +18,7 @@ export class Block {
   private index: number
   private hash: string
   private previousHash: string
-  private data: string
+  private transactions: Transaction[]
   private timestamp: number
   private nonce: number
   private miner: string
@@ -24,7 +26,7 @@ export class Block {
   constructor({
     index,
     previousHash,
-    data,
+    transactions,
     nonce,
     miner,
     timestamp,
@@ -32,7 +34,7 @@ export class Block {
   }: CreateBlockParams) {
     this.index = index
     this.previousHash = previousHash
-    this.data = data
+    this.transactions = transactions
     this.nonce = nonce ?? 0
     this.miner = miner ?? ''
 
@@ -45,7 +47,12 @@ export class Block {
       index: 0,
       previousHash:
         '0000000000000000000000000000000000000000000000000000000000000000',
-      data: 'Genesis Block',
+      transactions: [
+        new Transaction({
+          type: TransactionType.FEE,
+          data: 'Genesis Transaction',
+        }),
+      ],
     })
 
     block.mine(0, 'genesis')
@@ -54,9 +61,11 @@ export class Block {
   }
 
   private generateHash(): string {
+    const txs = this.transactions.map((tx) => tx.getHash()).join('')
+
     return sha256(
       this.index +
-        this.data +
+        txs +
         this.timestamp +
         this.previousHash +
         this.nonce +
@@ -72,8 +81,8 @@ export class Block {
     return this.previousHash
   }
 
-  getData(): string {
-    return this.data
+  getTransactions(): Transaction[] {
+    return this.transactions.slice()
   }
 
   getNonce(): number {
@@ -92,9 +101,19 @@ export class Block {
     return this.hash
   }
 
-  private validateData(): void {
-    if (!this.data) {
-      throw new ValidationError('Invalid block data')
+  private validateTransactions(): void {
+    const fees = this.transactions.filter(
+      (tx) => tx.getType() === TransactionType.FEE,
+    )
+
+    if (fees.length > 1) {
+      throw new ValidationError('Block contains multiple fee transactions')
+    }
+
+    try {
+      this.transactions.forEach((tx) => tx.validate())
+    } catch (error) {
+      throw new Error(`'Invalid block due to invalid transaction. ${error}'`)
     }
   }
 
@@ -134,7 +153,7 @@ export class Block {
     difficulty: number,
   ): void {
     try {
-      this.validateData()
+      this.validateTransactions()
       this.validateTimestamp()
       this.validatePreviousBlock(previousHash, previousIndex)
       this.validateMining()

@@ -23,6 +23,14 @@ export class Transaction {
     this.hash = hash || this.generateHash()
   }
 
+  getType(): TransactionType {
+    return this.type
+  }
+
+  getHash(): string {
+    return this.hash
+  }
+
   private generateHash(): string {
     return sha256(this.type + this.data + this.timestamp).toString()
   }

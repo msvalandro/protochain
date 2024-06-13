@@ -1,5 +1,7 @@
 import { Block } from './block'
 import { BlockInfo } from './block-info'
+import { Transaction } from './transaction'
+import { TransactionType } from './transaction-type'
 import { ValidationError } from './validation-error'
 
 export class Blockchain {
@@ -28,7 +30,12 @@ export class Blockchain {
     return {
       index: this.nextIndex,
       previousHash: this.getLastBlock().getHash(),
-      data: new Date().toISOString(),
+      transactions: [
+        new Transaction({
+          type: TransactionType.REGULAR,
+          data: new Date().toISOString(),
+        }),
+      ],
       difficulty: this.getDifficulty(),
       maxDifficulty: Blockchain.MAX_DIFFICULTY,
       feePerTx: this.getFeePerTx(),
