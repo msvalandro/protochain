@@ -174,4 +174,8 @@ export class Block {
       this.hash = this.generateHash()
     } while (!this.hash.startsWith(prefix))
   }
+
+  hasTransaction(hash: string): boolean {
+    return this.transactions.some((tx) => tx.getHash() === hash)
+  }
 }

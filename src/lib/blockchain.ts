@@ -1,15 +1,20 @@
 import { Block } from './block'
 import { BlockInfo } from './block-info'
 import { Transaction } from './transaction'
+import { TransactionType } from './transaction-type'
 import { ValidationError } from './validation-error'
 
 export class Blockchain {
+  private mempool: Transaction[]
   private blocks: Block[]
   private nextIndex = 1
+
+  static readonly TX_PER_BLOCK = 2
   static readonly DIFFICULTY_FACTOR = 5
   static readonly MAX_DIFFICULTY = 62
 
   constructor() {
+    this.mempool = []
     this.blocks = [Block.genesis()]
   }
 
@@ -25,11 +30,15 @@ export class Blockchain {
     return 1
   }
 
-  getNextBlock(): BlockInfo {
+  getNextBlock(): BlockInfo | null {
+    if (!this.mempool.length) {
+      return null
+    }
+
     return {
       index: this.nextIndex,
       previousHash: this.getLastBlock().getHash(),
-      transactions: [new Transaction({ data: new Date().toISOString() })],
+      transactions: this.mempool.slice(0, Blockchain.TX_PER_BLOCK),
       difficulty: this.getDifficulty(),
       maxDifficulty: Blockchain.MAX_DIFFICULTY,
       feePerTx: this.getFeePerTx(),
@@ -44,6 +53,31 @@ export class Blockchain {
     return Math.ceil(this.blocks.length / Blockchain.DIFFICULTY_FACTOR)
   }
 
+  private validateTransactionInBlocks(hash: string): void {
+    if (this.blocks.some((block) => block.hasTransaction(hash))) {
+      throw new ValidationError('Transaction already in blockchain')
+    }
+  }
+
+  private validateTransactionInMempool(hash: string): void {
+    if (this.mempool.some((tx) => tx.getHash() === hash)) {
+      throw new ValidationError('Transaction already in mempool')
+    }
+  }
+
+  addTransaction(transaction: Transaction): void {
+    try {
+      transaction.validate()
+
+      this.validateTransactionInBlocks(transaction.getHash())
+      this.validateTransactionInMempool(transaction.getHash())
+
+      this.mempool.push(transaction)
+    } catch (error) {
+      throw new ValidationError(`Invalid transaction. ${error}`)
+    }
+  }
+
   addBlock(block: Block): void {
     try {
       const previousBlock = this.getLastBlock()
@@ -53,6 +87,19 @@ export class Blockchain {
         previousBlock.getIndex(),
         this.getDifficulty(),
       )
+
+      const txs = block
+        .getTransactions()
+        .filter((tx) => tx.getType() !== TransactionType.FEE)
+        .map((tx) => tx.getHash())
+
+      const newMempool = this.mempool.filter(
+        (tx) => !txs.includes(tx.getHash()),
+      )
+
+      if (newMempool.length + txs.length !== this.mempool.length) {
+        throw new ValidationError('Invalid tx in block mempool')
+      }
 
       this.blocks.push(block)
       this.nextIndex++
