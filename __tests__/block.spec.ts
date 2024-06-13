@@ -153,7 +153,9 @@ describe('Block tests', () => {
     const transaction = new Transaction({ data: 'Transaction 1' })
     const block = createBlock({ transactions: [transaction] })
 
-    expect(block.getTransaction(transaction.getHash())).toBe(transaction)
+    expect(block.getTransaction(transaction.getHash())?.getData()).toBe(
+      'Transaction 1',
+    )
   })
 
   it('should has transaction with hash', () => {

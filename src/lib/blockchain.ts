@@ -138,6 +138,8 @@ export class Blockchain {
         throw new ValidationError('Invalid tx in block mempool')
       }
 
+      this.mempool = newMempool
+
       this.blocks.push(block)
       this.nextIndex++
     } catch (error) {

@@ -52,7 +52,6 @@ export class Blockchain {
   }
 
   getTransaction(hash: string): Transaction | undefined {
-    console.log('getTransaction', hash)
     return this.transactions.find(
       (transaction) => transaction.getHash() === hash,
     )

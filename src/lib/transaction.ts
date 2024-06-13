@@ -3,7 +3,7 @@ import sha256 from 'crypto-js/sha256'
 import { TransactionType } from './transaction-type'
 import { ValidationError } from './validation-error'
 
-interface CreateTransactionParams {
+export interface CreateTransactionParams {
   type?: TransactionType
   data: string
   timestamp?: number

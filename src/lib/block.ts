@@ -1,13 +1,13 @@
 import sha256 from 'crypto-js/sha256'
 
-import { Transaction } from './transaction'
+import { CreateTransactionParams, Transaction } from './transaction'
 import { TransactionType } from './transaction-type'
 import { ValidationError } from './validation-error'
 
 interface CreateBlockParams {
   index: number
   previousHash: string
-  transactions: Transaction[]
+  transactions: Transaction[] | CreateTransactionParams[]
   nonce?: number
   miner?: string
   timestamp?: number
@@ -34,7 +34,9 @@ export class Block {
   }: CreateBlockParams) {
     this.index = index
     this.previousHash = previousHash
-    this.transactions = transactions
+    this.transactions = transactions.map(
+      (tx) => new Transaction({ ...tx } as CreateTransactionParams),
+    )
     this.nonce = nonce ?? 0
     this.miner = miner ?? ''
 

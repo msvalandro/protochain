@@ -6,6 +6,25 @@ jest.mock('../src/lib/block')
 jest.mock('../src/lib/blockchain')
 
 describe('BlockchainServer tests', () => {
+  function createBlock(index = 1): object {
+    return {
+      index,
+      previousHash: 'abc',
+      transactions: [
+        {
+          type: 'regular',
+          data: 'transaction 1',
+          timestamp: 1,
+          hash: 'transaction-hash',
+        },
+      ],
+      nonce: 1,
+      miner: 'miner',
+      timestamp: 1,
+      hash: 'def',
+    }
+  }
+
   beforeAll(async () => {
     await app.ready()
   })
@@ -45,15 +64,7 @@ describe('BlockchainServer tests', () => {
   })
 
   test('POST /blocks - should add block on blockchain', async () => {
-    const block = {
-      index: 1,
-      previousHash: 'abc',
-      data: 'block 1',
-      nonce: 1,
-      miner: 'miner',
-      timestamp: 1,
-      hash: 'def',
-    }
+    const block = createBlock()
     const response = await request(app.server).post('/blocks').send(block)
 
     expect(response.status).toBe(201)
@@ -70,15 +81,7 @@ describe('BlockchainServer tests', () => {
   })
 
   test('POST /blocks - should not be able to add invalid block', async () => {
-    const block = {
-      index: -1,
-      previousHash: 'abc',
-      data: 'block 1',
-      nonce: 1,
-      miner: 'miner',
-      timestamp: 1,
-      hash: 'def',
-    }
+    const block = createBlock(-1)
     const response = await request(app.server).post('/blocks').send(block)
 
     expect(response.status).toBe(400)
@@ -86,15 +89,7 @@ describe('BlockchainServer tests', () => {
   })
 
   test('POST /blocks - should not be able to add block if internal server error', async () => {
-    const block = {
-      index: 99,
-      previousHash: 'abc',
-      data: 'block 1',
-      nonce: 1,
-      miner: 'miner',
-      timestamp: 1,
-      hash: 'def',
-    }
+    const block = createBlock(99)
     const response = await request(app.server).post('/blocks').send(block)
 
     expect(response.status).toBe(500)

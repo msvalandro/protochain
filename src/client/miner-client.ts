@@ -20,9 +20,21 @@ async function mine(): Promise<void> {
   const { data: responseData } = await axios.get(
     `${BLOCKCHAIN_SERVER}/blocks/next`,
   )
-  const { index, previousHash, data, difficulty } =
+
+  if (!responseData.block) {
+    console.log('No blocks to mine. Waiting 5 seconds...')
+
+    setTimeout(() => {
+      mine()
+    }, 5000)
+
+    return
+  }
+
+  const { index, previousHash, transactions, difficulty } =
     responseData.block as BlockInfo
-  const block = new Block({ index, previousHash, data })
+
+  const block = new Block({ index, previousHash, transactions })
 
   console.log('Start mining block #', block.getIndex())
 
@@ -34,7 +46,7 @@ async function mine(): Promise<void> {
     await axios.post(`${BLOCKCHAIN_SERVER}/blocks`, {
       index: block.getIndex(),
       previousHash: block.getPreviousHash(),
-      data: block.getData(),
+      transactions: block.getTransactions(),
       nonce: block.getNonce(),
       miner: block.getMiner(),
       timestamp: block.getTimestamp(),
@@ -54,7 +66,9 @@ async function mine(): Promise<void> {
     console.error((error as Error).message)
   }
 
-  setTimeout(mine, 1000)
+  setTimeout(() => {
+    mine()
+  }, 1000)
 }
 
 mine()

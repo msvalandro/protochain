@@ -4,6 +4,7 @@ import { z, ZodError } from 'zod'
 import { Block } from '../../lib/block'
 import { Blockchain } from '../../lib/blockchain'
 import { Transaction } from '../../lib/transaction'
+import { TransactionType } from '../../lib/transaction-type'
 import { ValidationError } from '../../lib/validation-error'
 
 export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
@@ -11,7 +12,8 @@ export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
 
   app.get('/status', () => {
     return {
-      numberOfBlocks: blockchain.getBlocks().length,
+      mempool: blockchain.getMempool().length,
+      blocks: blockchain.getBlocks().length,
       isValid: blockchain.isValid(),
       lastBlock: blockchain.getLastBlock(),
     }
@@ -42,7 +44,14 @@ export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
     const createBlockBodySchema = z.object({
       index: z.number(),
       previousHash: z.string(),
-      data: z.string(),
+      transactions: z.array(
+        z.object({
+          type: z.enum([TransactionType.FEE, TransactionType.REGULAR]),
+          data: z.string(),
+          timestamp: z.number(),
+          hash: z.string(),
+        }),
+      ),
       nonce: z.number(),
       miner: z.string(),
       timestamp: z.number(),
@@ -50,12 +59,19 @@ export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
     })
 
     try {
-      const { index, data, previousHash, nonce, miner, timestamp, hash } =
-        createBlockBodySchema.parse(request.body)
-      const transaction = new Transaction({ data })
+      const {
+        index,
+        transactions,
+        previousHash,
+        nonce,
+        miner,
+        timestamp,
+        hash,
+      } = createBlockBodySchema.parse(request.body)
+
       const block = new Block({
         index,
-        transactions: [transaction],
+        transactions,
         previousHash,
         nonce,
         miner,
