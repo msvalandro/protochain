@@ -34,7 +34,7 @@ export class Transaction {
   }
 
   private generateHash(): string {
-    return 'abc'
+    return this.hash || 'abc'
   }
 
   private validateData(): void {

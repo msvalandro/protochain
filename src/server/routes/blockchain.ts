@@ -82,13 +82,19 @@ export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
     }
   })
 
-  app.get('/transactions/:hash?', (request) => {
+  app.get('/transactions/:hash?', (request, reply) => {
     const getTransactionParamsSchema = z.object({
       hash: z.optional(z.string()),
     })
     const { hash } = getTransactionParamsSchema.parse(request.params)
 
     if (hash) {
+      const findTransaction = blockchain.getTransaction(hash)
+
+      if (!findTransaction) {
+        return reply.status(404).send()
+      }
+
       return { transaction: blockchain.getTransaction(hash) }
     }
 

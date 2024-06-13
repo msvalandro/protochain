@@ -148,4 +148,18 @@ describe('Block tests', () => {
       block.validate(genesis.getHash(), genesis.getIndex(), exampleDifficulty)
     }).toThrow('Block contains multiple fee transactions')
   })
+
+  it('should get transaction by hash', () => {
+    const transaction = new Transaction({ data: 'Transaction 1' })
+    const block = createBlock({ transactions: [transaction] })
+
+    expect(block.getTransaction(transaction.getHash())).toBe(transaction)
+  })
+
+  it('should has transaction with hash', () => {
+    const transaction = new Transaction({ data: 'Transaction 1' })
+    const block = createBlock({ transactions: [transaction] })
+
+    expect(block.hasTransaction(transaction.getHash())).toBe(true)
+  })
 })

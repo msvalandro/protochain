@@ -6,11 +6,22 @@ jest.mock('../src/lib/block')
 jest.mock('../src/lib/transaction')
 
 describe('Blockchain tests', () => {
-  function createBlock(previousHash: string, index = 1): Block {
+  function createBlock(
+    previousHash: string,
+    index = 1,
+    hasTransaction = false,
+  ): Block {
     return new Block({
       index,
       previousHash,
-      transactions: [new Transaction({ data: 'Transaction 1' })],
+      transactions: hasTransaction
+        ? [
+            new Transaction({
+              data: 'Transaction 1',
+              hash: 'transaction-hash',
+            }),
+          ]
+        : [],
     })
   }
 
@@ -79,6 +90,96 @@ describe('Blockchain tests', () => {
   it('should return next block', () => {
     const blockchain = new Blockchain()
 
-    expect(blockchain.getNextBlock().index).toBe(1)
+    blockchain.addTransaction(new Transaction({ data: 'Transaction 1' }))
+
+    expect(blockchain.getNextBlock()?.index).toBe(1)
+  })
+
+  it('should not return next block if there is no transactions on mempull', () => {
+    const blockchain = new Blockchain()
+
+    expect(blockchain.getNextBlock()).toBeNull()
+  })
+
+  it('should return mempool', () => {
+    const blockchain = new Blockchain()
+
+    blockchain.addTransaction(new Transaction({ data: 'Transaction 1' }))
+
+    expect(blockchain.getMempool().length).toBe(1)
+  })
+
+  it('should return transaction from mempool', () => {
+    const blockchain = new Blockchain()
+
+    const transaction = new Transaction({ data: 'Transaction 1' })
+
+    blockchain.addTransaction(transaction)
+
+    expect(blockchain.getTransaction(transaction.getHash()).transaction).toBe(
+      transaction,
+    )
+  })
+
+  it('should return transaction from block', () => {
+    const blockchain = new Blockchain()
+
+    blockchain.addTransaction(
+      new Transaction({ data: 'Transaction 1', hash: 'transaction-hash' }),
+    )
+    const block = createBlock(blockchain.getBlocks()[0].getHash(), 1, true)
+
+    blockchain.addBlock(block)
+
+    expect(blockchain.getTransaction('abc').transaction?.getHash()).toBe(
+      'transaction-hash',
+    )
+  })
+
+  it('should not return transaction if no transactions', () => {
+    const blockchain = new Blockchain()
+
+    const block = createBlock(blockchain.getBlocks()[0].getHash())
+
+    blockchain.addBlock(block)
+
+    expect(blockchain.getTransaction('abc').transaction).toBeUndefined()
+  })
+
+  it('should not be able to add transaction if transaction already in blockchain', () => {
+    const blockchain = new Blockchain()
+
+    const block = createBlock(blockchain.getBlocks()[0].getHash(), 1, true)
+
+    blockchain.addTransaction(
+      new Transaction({ data: 'Transaction 1', hash: 'transaction-hash' }),
+    )
+    blockchain.addBlock(block)
+
+    expect(() => {
+      blockchain.addTransaction(new Transaction({ data: 'Transaction 1' }))
+    }).toThrow('Transaction already in blockchain')
+  })
+
+  it('should not be able to add transaction if transaction already in mempool', () => {
+    const blockchain = new Blockchain()
+
+    blockchain.addTransaction(new Transaction({ data: 'Transaction 1' }))
+
+    expect(() => {
+      blockchain.addTransaction(new Transaction({ data: 'Transaction 1' }))
+    }).toThrow('Transaction already in mempool')
+  })
+
+  it('should not be able to add block with invalid transaction', () => {
+    const blockchain = new Blockchain()
+
+    blockchain.addTransaction(new Transaction({ data: 'Transaction 1' }))
+
+    const block = createBlock(blockchain.getBlocks()[0].getHash(), 1, true)
+
+    expect(() => {
+      blockchain.addBlock(block)
+    }).toThrow('Invalid tx in block mempool')
   })
 })

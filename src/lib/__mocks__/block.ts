@@ -53,6 +53,18 @@ export class Block {
     return this.hash
   }
 
+  getTransaction(): Transaction {
+    return new Transaction({ data: 'Transaction 1', hash: 'transaction-hash' })
+  }
+
+  getTransactions(): Transaction[] {
+    return this.transactions.slice()
+  }
+
+  hasTransaction(): boolean {
+    return this.transactions[0]?.getHash() === 'transaction-hash'
+  }
+
   validate(previousHash: string, previousIndex: number): void {
     if (!previousHash || previousIndex < 0 || this.index < 0) {
       throw new ValidationError('Invalid mocked block')

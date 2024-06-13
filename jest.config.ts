@@ -36,6 +36,7 @@ const config: Config = {
     '/src/lib/block-info.ts',
     '/src/lib/validation-error.ts',
     '/src/lib/transaction-type.ts',
+    '/src/lib/transaction-search.ts',
   ],
 
   // Indicates which provider should be used to instrument code for coverage

@@ -99,4 +99,68 @@ describe('BlockchainServer tests', () => {
 
     expect(response.status).toBe(500)
   })
+
+  test('GET /transactions/:hash - should return transaction #transaction-hash', async () => {
+    const response = await request(app.server).get(
+      '/transactions/transaction-hash',
+    )
+
+    expect(response.status).toBe(200)
+    expect(response.body.transaction.hash).toBe('transaction-hash')
+  })
+
+  test('GET /transactions/:hash - should return transaction not found', async () => {
+    const response = await request(app.server).get('/transactions/not-found')
+
+    expect(response.status).toBe(404)
+  })
+
+  test('GET /transactions - should return next transactions', async () => {
+    const response = await request(app.server).get('/transactions')
+
+    expect(response.status).toBe(200)
+    expect(response.body.next[0].data).toBe('Transaction 1')
+  })
+
+  test('POST /transactions - should add transaction', async () => {
+    const transaction = { data: 'transaction 1' }
+    const response = await request(app.server)
+      .post('/transactions')
+      .send(transaction)
+
+    expect(response.status).toBe(201)
+    expect(response.body.transaction.data).toBe('transaction 1')
+  })
+
+  test('POST /transactions - should not be able to add transaction with invalid data', async () => {
+    const transaction = {}
+    const response = await request(app.server)
+      .post('/transactions')
+      .send(transaction)
+
+    expect(response.status).toBe(400)
+    expect(response.body.message).toBe(
+      'Could not create the transaction with the provided data',
+    )
+  })
+
+  test('POST /transactions - should not be able to add transaction if fails validation', async () => {
+    const transaction = { data: 'invalid transaction' }
+    const response = await request(app.server)
+      .post('/transactions')
+      .send(transaction)
+
+    expect(response.status).toBe(400)
+    expect(response.body.message).toBe('Invalid transaction data')
+  })
+
+  test('POST /transactions - should not be able to add transaction if internal server error', async () => {
+    const transaction = { data: 'internal server error transaction' }
+
+    const response = await request(app.server)
+      .post('/transactions')
+      .send(transaction)
+
+    expect(response.status).toBe(500)
+  })
 })
