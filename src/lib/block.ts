@@ -113,7 +113,7 @@ export class Block {
     try {
       this.transactions.forEach((tx) => tx.validate())
     } catch (error) {
-      throw new Error(`'Invalid block due to invalid transaction. ${error}'`)
+      throw new Error(`Invalid block due to invalid transaction. ${error}`)
     }
   }
 

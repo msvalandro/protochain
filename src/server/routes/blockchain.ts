@@ -3,6 +3,7 @@ import { z, ZodError } from 'zod'
 
 import { Block } from '../../lib/block'
 import { Blockchain } from '../../lib/blockchain'
+import { Transaction } from '../../lib/transaction'
 import { ValidationError } from '../../lib/validation-error'
 
 export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
@@ -51,9 +52,10 @@ export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
     try {
       const { index, data, previousHash, nonce, miner, timestamp, hash } =
         createBlockBodySchema.parse(request.body)
+      const transaction = new Transaction({ data })
       const block = new Block({
         index,
-        data,
+        transactions: [transaction],
         previousHash,
         nonce,
         miner,

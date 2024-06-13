@@ -1,33 +1,44 @@
+import { TransactionType } from '../transaction-type'
 import { ValidationError } from '../validation-error'
+import { Transaction } from './transaction'
 
 interface CreateBlockParams {
   index: number
   previousHash: string
-  data: string
+  transactions: Transaction[]
 }
 
 export class Block {
   private index: number
   private hash: string
   private previousHash: string
-  private data: string
+  private transactions: Transaction[]
   private timestamp: number
 
-  constructor({ index, previousHash, data }: CreateBlockParams) {
+  constructor({ index, previousHash, transactions }: CreateBlockParams) {
     this.index = index
     this.previousHash = previousHash
-    this.data = data
+    this.transactions = transactions
     this.timestamp = Date.now()
     this.hash = this.generateHash()
   }
 
   static genesis(): Block {
-    return new Block({
+    const block = new Block({
       index: 0,
       previousHash:
         '0000000000000000000000000000000000000000000000000000000000000000',
-      data: 'Genesis Block',
+      transactions: [
+        new Transaction({
+          type: TransactionType.FEE,
+          data: 'Genesis Transaction',
+        }),
+      ],
     })
+
+    block.mine()
+
+    return block
   }
 
   private generateHash(): string {
@@ -47,4 +58,6 @@ export class Block {
       throw new ValidationError('Invalid mocked block')
     }
   }
+
+  mine(): void {}
 }

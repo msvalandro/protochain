@@ -1,7 +1,5 @@
-import sha256 from 'crypto-js/sha256'
-
-import { TransactionType } from './transaction-type'
-import { ValidationError } from './validation-error'
+import { TransactionType } from '../transaction-type'
+import { ValidationError } from '../validation-error'
 
 interface CreateTransactionParams {
   type?: TransactionType
@@ -36,18 +34,18 @@ export class Transaction {
   }
 
   private generateHash(): string {
-    return sha256(this.type + this.data + this.timestamp).toString()
+    return 'abc'
   }
 
   private validateData(): void {
     if (!this.data) {
-      throw new ValidationError('Invalid transaction data')
+      throw new ValidationError('Invalid mocked transaction data')
     }
   }
 
   private validateHash(): void {
     if (this.hash !== this.generateHash()) {
-      throw new ValidationError('Invalid transaction hash')
+      throw new ValidationError('Invalid mocked transaction hash')
     }
   }
 

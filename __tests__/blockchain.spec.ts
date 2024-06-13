@@ -1,9 +1,19 @@
 import { Block } from '../src/lib/block'
 import { Blockchain } from '../src/lib/blockchain'
+import { Transaction } from '../src/lib/transaction'
 
 jest.mock('../src/lib/block')
+jest.mock('../src/lib/transaction')
 
 describe('Blockchain tests', () => {
+  function createBlock(previousHash: string, index = 1): Block {
+    return new Block({
+      index,
+      previousHash,
+      transactions: [new Transaction({ data: 'Transaction 1' })],
+    })
+  }
+
   it('should has genesis block', () => {
     const blockchain = new Blockchain()
 
@@ -14,11 +24,7 @@ describe('Blockchain tests', () => {
     const blockchain = new Blockchain()
 
     const previousBlock = blockchain.getBlocks()[0]
-    const block = new Block({
-      index: 1,
-      previousHash: previousBlock.getHash(),
-      data: 'data',
-    })
+    const block = createBlock(previousBlock.getHash())
 
     blockchain.addBlock(block)
 
@@ -29,11 +35,7 @@ describe('Blockchain tests', () => {
     const blockchain = new Blockchain()
 
     const previousBlock = blockchain.getBlocks()[0]
-    const block = new Block({
-      index: 1,
-      previousHash: previousBlock.getHash(),
-      data: 'data',
-    })
+    const block = createBlock(previousBlock.getHash())
 
     blockchain.addBlock(block)
 
@@ -43,11 +45,7 @@ describe('Blockchain tests', () => {
   it('should not be able to add invalid block', () => {
     const blockchain = new Blockchain()
 
-    const block = new Block({
-      index: -1,
-      previousHash: 'hash',
-      data: 'data',
-    })
+    const block = createBlock('hash', -1)
 
     expect(() => {
       blockchain.addBlock(block)
@@ -58,11 +56,7 @@ describe('Blockchain tests', () => {
     const blockchain = new Blockchain()
 
     const previousBlock = blockchain.getBlocks()[0]
-    const block = new Block({
-      index: 1,
-      previousHash: previousBlock.getHash(),
-      data: 'data',
-    })
+    const block = createBlock(previousBlock.getHash())
 
     blockchain.addBlock(block)
 
