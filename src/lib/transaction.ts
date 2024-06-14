@@ -1,13 +1,16 @@
 import sha256 from 'crypto-js/sha256'
 
-import { TransactionInput } from './transaction-input'
+import {
+  CreateTransactionInputParams,
+  TransactionInput,
+} from './transaction-input'
 import { TransactionType } from './transaction-type'
 import { ValidationError } from './validation-error'
 
 export interface CreateTransactionParams {
   type?: TransactionType
   to: string
-  txInput: TransactionInput
+  txInput?: TransactionInput | CreateTransactionInputParams
   timestamp?: number
   hash?: string
 }
@@ -22,7 +25,7 @@ export class Transaction {
   constructor({ type, to, txInput, timestamp, hash }: CreateTransactionParams) {
     this.type = type || TransactionType.REGULAR
     this.to = to
-    this.txInput = new TransactionInput(txInput)
+    this.txInput = txInput && new TransactionInput(txInput)
 
     this.timestamp = timestamp || Date.now()
     this.hash = hash || this.generateHash()

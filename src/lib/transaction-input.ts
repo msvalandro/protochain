@@ -6,7 +6,7 @@ import { ValidationError } from './validation-error'
 
 const ECPair = ECPairFactory(ecc)
 
-interface CreateTransactionInputParams {
+export interface CreateTransactionInputParams {
   fromAddress: string
   amount: number
   signature: string

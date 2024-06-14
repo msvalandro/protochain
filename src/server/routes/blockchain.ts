@@ -47,7 +47,14 @@ export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
       transactions: z.array(
         z.object({
           type: z.enum([TransactionType.FEE, TransactionType.REGULAR]),
-          data: z.string(),
+          to: z.string(),
+          txInput: z.optional(
+            z.object({
+              fromAddress: z.string(),
+              amount: z.number(),
+              signature: z.string(),
+            }),
+          ),
           timestamp: z.number(),
           hash: z.string(),
         }),
@@ -123,14 +130,21 @@ export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
   app.post('/transactions', (request, reply) => {
     const createTransactionBodySchema = z.object({
       // type: z.enum([TransactionType.FEE, TransactionType.REGULAR]),
-      data: z.string(),
+      to: z.string(),
+      txInput: z.optional(
+        z.object({
+          fromAddress: z.string(),
+          amount: z.number(),
+          signature: z.string(),
+        }),
+      ),
       // timestamp: z.number(),
       // hash: z.string(),
     })
 
     try {
-      const { data } = createTransactionBodySchema.parse(request.body)
-      const transaction = new Transaction({ data })
+      const { to, txInput } = createTransactionBodySchema.parse(request.body)
+      const transaction = new Transaction({ to, txInput })
 
       blockchain.addTransaction(transaction)
 

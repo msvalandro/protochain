@@ -52,7 +52,7 @@ export class Block {
       transactions: [
         new Transaction({
           type: TransactionType.FEE,
-          data: 'Genesis Transaction',
+          to: 'genesis-block',
         }),
       ],
     })
