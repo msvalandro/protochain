@@ -10,7 +10,7 @@ export class Blockchain {
 
   constructor() {
     this.transactions = [
-      new Transaction({ data: 'Transaction 1', hash: 'transaction-hash' }),
+      new Transaction({ to: 'mock-wallet', hash: 'transaction-hash' }),
     ]
     this.blocks = [Block.genesis()]
   }
@@ -62,11 +62,14 @@ export class Blockchain {
   }
 
   addTransaction(transaction: Transaction): void {
-    if (transaction.getData() === 'invalid transaction') {
+    if (transaction.getTxInput()?.getFromAddress() === 'invalid-transaction') {
       throw new ValidationError('Invalid transaction data')
     }
 
-    if (transaction.getData() === 'internal server error transaction') {
+    if (
+      transaction.getTxInput()?.getFromAddress() ===
+      'internal-server-error-transaction'
+    ) {
       throw new Error('Simulate internal server error')
     }
   }

@@ -25,7 +25,9 @@ export class Transaction {
   constructor({ type, to, txInput, timestamp, hash }: CreateTransactionParams) {
     this.type = type || TransactionType.REGULAR
     this.to = to
-    this.txInput = txInput && new TransactionInput(txInput)
+    this.txInput =
+      txInput &&
+      new TransactionInput({ ...txInput } as CreateTransactionInputParams)
 
     this.timestamp = timestamp || Date.now()
     this.hash = hash || this.generateHash()
@@ -45,7 +47,7 @@ export class Transaction {
 
   private generateHash(): string {
     return sha256(
-      this.type + this.to + this.txInput?.generateHash() || '' + this.timestamp,
+      this.type + this.to + this.txInput?.generateHash() + this.timestamp,
     ).toString()
   }
 
@@ -64,6 +66,8 @@ export class Transaction {
   }
 
   private validateHash(): void {
+    console.log(this.hash)
+    console.log(this.generateHash())
     if (this.hash !== this.generateHash()) {
       throw new ValidationError('Invalid transaction hash')
     }

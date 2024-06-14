@@ -1,9 +1,11 @@
 import { Block } from '../src/lib/block'
 import { Transaction } from '../src/lib/transaction'
+import { TransactionInput } from '../src/lib/transaction-input'
 import { TransactionType } from '../src/lib/transaction-type'
 import { ValidationError } from '../src/lib/validation-error'
 
 jest.mock('../src/lib/transaction')
+jest.mock('../src/lib/transaction-input')
 
 interface CreateBlockParams {
   index?: number
@@ -25,7 +27,14 @@ describe('Block tests', () => {
       index: index ?? 1,
       previousHash: previousHash ?? genesis.getHash(),
       transactions: transactions ?? [
-        new Transaction({ data: 'Transaction 1' }),
+        new Transaction({
+          to: 'mock-wallet',
+          txInput: new TransactionInput({
+            fromAddress: 'mock-wallet',
+            amount: 1,
+            signature: 'mock-signature',
+          }),
+        }),
       ],
       nonce: 0,
       miner: 'miner',
@@ -53,7 +62,9 @@ describe('Block tests', () => {
 
     expect(block.getIndex()).toBe(1)
     expect(block.getPreviousHash()).toBe(genesis.getHash())
-    expect(block.getTransactions()[0].getData()).toBe('Transaction 1')
+    expect(block.getTransactions()[0].getTxInput()?.getFromAddress()).toBe(
+      'mock-wallet',
+    )
     expect(block.getNonce()).toBe(0)
     expect(block.getMiner()).toBe('miner')
     expect(block.getTimestamp()).toBeGreaterThan(0)
@@ -78,7 +89,7 @@ describe('Block tests', () => {
 
   it('should not be valid due to transaction data', () => {
     const block = createBlock({
-      transactions: [new Transaction({ data: '' })],
+      transactions: [new Transaction({ to: '' })],
     })
 
     expect(() => {
@@ -135,11 +146,11 @@ describe('Block tests', () => {
   it('should be invalid block if transactions contains more than one fee', () => {
     const transaction1 = new Transaction({
       type: TransactionType.FEE,
-      data: 'Transaction 1',
+      to: 'mock-wallet',
     })
     const transaction2 = new Transaction({
       type: TransactionType.FEE,
-      data: 'Transaction 2',
+      to: 'mock-wallet',
     })
 
     const block = createBlock({ transactions: [transaction1, transaction2] })
@@ -150,16 +161,26 @@ describe('Block tests', () => {
   })
 
   it('should get transaction by hash', () => {
-    const transaction = new Transaction({ data: 'Transaction 1' })
+    const transaction = new Transaction({
+      to: 'mock-wallet',
+      txInput: new TransactionInput({
+        fromAddress: 'mock-wallet',
+        amount: 1,
+        signature: 'mock-signature',
+      }),
+    })
     const block = createBlock({ transactions: [transaction] })
 
-    expect(block.getTransaction(transaction.getHash())?.getData()).toBe(
-      'Transaction 1',
-    )
+    expect(
+      block
+        .getTransaction(transaction.getHash())
+        ?.getTxInput()
+        ?.getFromAddress(),
+    ).toBe('mock-wallet')
   })
 
   it('should has transaction with hash', () => {
-    const transaction = new Transaction({ data: 'Transaction 1' })
+    const transaction = new Transaction({ to: 'mock-wallet' })
     const block = createBlock({ transactions: [transaction] })
 
     expect(block.hasTransaction(transaction.getHash())).toBe(true)

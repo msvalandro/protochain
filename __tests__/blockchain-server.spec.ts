@@ -13,7 +13,12 @@ describe('BlockchainServer tests', () => {
       transactions: [
         {
           type: 'regular',
-          data: 'transaction 1',
+          to: 'mock-wallet',
+          txInput: {
+            fromAddress: 'mock-wallet',
+            amount: 1,
+            signature: 'mock-signature',
+          },
           timestamp: 1,
           hash: 'transaction-hash',
         },
@@ -114,17 +119,17 @@ describe('BlockchainServer tests', () => {
     const response = await request(app.server).get('/transactions')
 
     expect(response.status).toBe(200)
-    expect(response.body.next[0].data).toBe('Transaction 1')
+    expect(response.body.next[0].to).toBe('mock-wallet')
   })
 
   test('POST /transactions - should add transaction', async () => {
-    const transaction = { data: 'transaction 1' }
+    const transaction = { to: 'mock-wallet' }
     const response = await request(app.server)
       .post('/transactions')
       .send(transaction)
 
     expect(response.status).toBe(201)
-    expect(response.body.transaction.data).toBe('transaction 1')
+    expect(response.body.transaction.to).toBe('mock-wallet')
   })
 
   test('POST /transactions - should not be able to add transaction with invalid data', async () => {
@@ -140,7 +145,14 @@ describe('BlockchainServer tests', () => {
   })
 
   test('POST /transactions - should not be able to add transaction if fails validation', async () => {
-    const transaction = { data: 'invalid transaction' }
+    const transaction = {
+      to: 'invalid-transaction',
+      txInput: {
+        fromAddress: 'invalid-transaction',
+        amount: 1,
+        signature: 'mock-signature',
+      },
+    }
     const response = await request(app.server)
       .post('/transactions')
       .send(transaction)
@@ -150,7 +162,14 @@ describe('BlockchainServer tests', () => {
   })
 
   test('POST /transactions - should not be able to add transaction if internal server error', async () => {
-    const transaction = { data: 'internal server error transaction' }
+    const transaction = {
+      to: 'internal-server-error-transaction',
+      txInput: {
+        fromAddress: 'internal-server-error-transaction',
+        amount: 1,
+        signature: 'mock-signature',
+      },
+    }
 
     const response = await request(app.server)
       .post('/transactions')

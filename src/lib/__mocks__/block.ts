@@ -31,7 +31,7 @@ export class Block {
       transactions: [
         new Transaction({
           type: TransactionType.FEE,
-          data: 'Genesis Transaction',
+          to: 'genesis-block',
         }),
       ],
     })
@@ -54,7 +54,7 @@ export class Block {
   }
 
   getTransaction(): Transaction {
-    return new Transaction({ data: 'Transaction 1', hash: 'transaction-hash' })
+    return new Transaction({ to: 'mock-wallet', hash: 'transaction-hash' })
   }
 
   getTransactions(): Transaction[] {

@@ -13,9 +13,9 @@ export interface CreateTransactionInputParams {
 }
 
 export class TransactionInput {
-  fromAddress: string
-  amount: number
-  signature: string
+  private fromAddress: string
+  private amount: number
+  private signature: string
 
   constructor({
     fromAddress,
@@ -25,6 +25,10 @@ export class TransactionInput {
     this.fromAddress = fromAddress
     this.amount = amount
     this.signature = signature
+  }
+
+  getFromAddress(): string {
+    return this.fromAddress
   }
 
   generateHash(): string {
@@ -39,6 +43,7 @@ export class TransactionInput {
   }
 
   private validateSignature(): void {
+    console.log('this.signature', this.signature)
     if (!this.signature) {
       throw new ValidationError('Signature is required')
     }
@@ -52,6 +57,7 @@ export class TransactionInput {
 
   private validateHash(): void {
     const hash = Buffer.from(this.generateHash(), 'hex')
+    console.log(this.fromAddress)
     const isValid = ECPair.fromPublicKey(
       Buffer.from(this.fromAddress, 'hex'),
     ).verify(hash, Buffer.from(this.signature, 'hex'))

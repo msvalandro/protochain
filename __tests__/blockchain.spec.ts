@@ -17,7 +17,7 @@ describe('Blockchain tests', () => {
       transactions: hasTransaction
         ? [
             new Transaction({
-              data: 'Transaction 1',
+              to: 'mock-wallet',
               hash: 'transaction-hash',
             }),
           ]
@@ -90,7 +90,7 @@ describe('Blockchain tests', () => {
   it('should return next block', () => {
     const blockchain = new Blockchain()
 
-    blockchain.addTransaction(new Transaction({ data: 'Transaction 1' }))
+    blockchain.addTransaction(new Transaction({ to: 'mock-wallet' }))
 
     expect(blockchain.getNextBlock()?.index).toBe(1)
   })
@@ -104,7 +104,7 @@ describe('Blockchain tests', () => {
   it('should return mempool', () => {
     const blockchain = new Blockchain()
 
-    blockchain.addTransaction(new Transaction({ data: 'Transaction 1' }))
+    blockchain.addTransaction(new Transaction({ to: 'mock-wallet' }))
 
     expect(blockchain.getMempool().length).toBe(1)
   })
@@ -112,7 +112,7 @@ describe('Blockchain tests', () => {
   it('should return transaction from mempool', () => {
     const blockchain = new Blockchain()
 
-    const transaction = new Transaction({ data: 'Transaction 1' })
+    const transaction = new Transaction({ to: 'mock-wallet' })
 
     blockchain.addTransaction(transaction)
 
@@ -125,7 +125,7 @@ describe('Blockchain tests', () => {
     const blockchain = new Blockchain()
 
     blockchain.addTransaction(
-      new Transaction({ data: 'Transaction 1', hash: 'transaction-hash' }),
+      new Transaction({ to: 'mock-wallet', hash: 'transaction-hash' }),
     )
     const block = createBlock(blockchain.getBlocks()[0].getHash(), 1, true)
 
@@ -152,29 +152,29 @@ describe('Blockchain tests', () => {
     const block = createBlock(blockchain.getBlocks()[0].getHash(), 1, true)
 
     blockchain.addTransaction(
-      new Transaction({ data: 'Transaction 1', hash: 'transaction-hash' }),
+      new Transaction({ to: 'mock-wallet', hash: 'transaction-hash' }),
     )
     blockchain.addBlock(block)
 
     expect(() => {
-      blockchain.addTransaction(new Transaction({ data: 'Transaction 1' }))
+      blockchain.addTransaction(new Transaction({ to: 'mock-wallet' }))
     }).toThrow('Transaction already in blockchain')
   })
 
   it('should not be able to add transaction if transaction already in mempool', () => {
     const blockchain = new Blockchain()
 
-    blockchain.addTransaction(new Transaction({ data: 'Transaction 1' }))
+    blockchain.addTransaction(new Transaction({ to: 'mock-wallet' }))
 
     expect(() => {
-      blockchain.addTransaction(new Transaction({ data: 'Transaction 1' }))
+      blockchain.addTransaction(new Transaction({ to: 'mock-wallet' }))
     }).toThrow('Transaction already in mempool')
   })
 
   it('should not be able to add block with invalid transaction', () => {
     const blockchain = new Blockchain()
 
-    blockchain.addTransaction(new Transaction({ data: 'Transaction 1' }))
+    blockchain.addTransaction(new Transaction({ to: 'mock-wallet' }))
 
     const block = createBlock(blockchain.getBlocks()[0].getHash(), 1, true)
 
