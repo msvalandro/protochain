@@ -9,7 +9,8 @@
     "dev:server": "tsx watch ./src/server/blockchain-server.ts",
     "start": "node ./dist/blockchain.js",
     "test": "jest --silent --NODE_ENV=test",
-    "miner": "tsx watch ./src/client/miner-client.ts"
+    "miner": "tsx watch ./src/client/miner-client.ts",
+    "wallet": "tsx watch ./src/client/wallet-client.ts"
   },
   "keywords": [],
   "author": "",
@@ -32,7 +33,9 @@
     "axios": "^1.7.2",
     "crypto-js": "^4.2.0",
     "dotenv": "^16.4.5",
+    "ecpair": "^2.1.0",
     "fastify": "^4.27.0",
+    "tiny-secp256k1": "^2.2.3",
     "zod": "^3.23.8"
   }
 }
