@@ -15,7 +15,7 @@ export interface CreateTransactionParams {
 export class Transaction {
   private type: TransactionType
   private to: string
-  private txInput: TransactionInput
+  private txInput?: TransactionInput
   private timestamp: number
   private hash: string
 
@@ -32,7 +32,7 @@ export class Transaction {
     return this.type
   }
 
-  getTxInput(): TransactionInput {
+  getTxInput(): TransactionInput | undefined {
     return this.txInput
   }
 
@@ -42,7 +42,7 @@ export class Transaction {
 
   private generateHash(): string {
     return sha256(
-      this.type + this.to + this.txInput.generateHash() + this.timestamp,
+      this.type + this.to + this.txInput?.generateHash() || '' + this.timestamp,
     ).toString()
   }
 
@@ -50,6 +50,14 @@ export class Transaction {
     if (!this.to) {
       throw new ValidationError('Invalid transaction to')
     }
+  }
+
+  private validateTransactionInput(): void {
+    if (!this.txInput) {
+      return
+    }
+
+    this.txInput.validate()
   }
 
   private validateHash(): void {
@@ -61,6 +69,7 @@ export class Transaction {
   validate(): void {
     try {
       this.validateTo()
+      this.validateTransactionInput()
       this.validateHash()
     } catch (error) {
       console.error((error as ValidationError).message)

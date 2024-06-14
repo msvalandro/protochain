@@ -21,4 +21,12 @@ export class Wallet {
       ? ECPair.fromPrivateKey(Buffer.from(wifOrPrivateKey, 'hex'))
       : ECPair.fromWIF(wifOrPrivateKey)
   }
+
+  getPrivateKey(): string {
+    return this.privateKey
+  }
+
+  getPublicKey(): string {
+    return this.publicKey
+  }
 }
