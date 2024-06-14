@@ -1,24 +1,29 @@
 import sha256 from 'crypto-js/sha256'
 
+import { TransactionInput } from './transaction-input'
 import { TransactionType } from './transaction-type'
 import { ValidationError } from './validation-error'
 
 export interface CreateTransactionParams {
   type?: TransactionType
-  data: string
+  to: string
+  txInput: TransactionInput
   timestamp?: number
   hash?: string
 }
 
 export class Transaction {
   private type: TransactionType
-  private data: string
+  private to: string
+  private txInput: TransactionInput
   private timestamp: number
   private hash: string
 
-  constructor({ type, data, timestamp, hash }: CreateTransactionParams) {
+  constructor({ type, to, txInput, timestamp, hash }: CreateTransactionParams) {
     this.type = type || TransactionType.REGULAR
-    this.data = data
+    this.to = to
+    this.txInput = new TransactionInput(txInput)
+
     this.timestamp = timestamp || Date.now()
     this.hash = hash || this.generateHash()
   }
@@ -27,8 +32,8 @@ export class Transaction {
     return this.type
   }
 
-  getData(): string {
-    return this.data
+  getTxInput(): TransactionInput {
+    return this.txInput
   }
 
   getHash(): string {
@@ -36,12 +41,14 @@ export class Transaction {
   }
 
   private generateHash(): string {
-    return sha256(this.type + this.data + this.timestamp).toString()
+    return sha256(
+      this.type + this.to + this.txInput.generateHash() + this.timestamp,
+    ).toString()
   }
 
-  private validateData(): void {
-    if (!this.data) {
-      throw new ValidationError('Invalid transaction data')
+  private validateTo(): void {
+    if (!this.to) {
+      throw new ValidationError('Invalid transaction to')
     }
   }
 
@@ -53,7 +60,7 @@ export class Transaction {
 
   validate(): void {
     try {
-      this.validateData()
+      this.validateTo()
       this.validateHash()
     } catch (error) {
       console.error((error as ValidationError).message)
