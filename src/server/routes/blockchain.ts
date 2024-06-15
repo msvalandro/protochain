@@ -135,7 +135,7 @@ export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
         z.object({
           fromAddress: z.string(),
           amount: z.number(),
-          signature: z.string(),
+          signature: z.optional(z.string()),
         }),
       ),
       // timestamp: z.number(),

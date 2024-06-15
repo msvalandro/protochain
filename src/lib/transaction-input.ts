@@ -9,7 +9,7 @@ const ECPair = ECPairFactory(ecc)
 export interface CreateTransactionInputParams {
   fromAddress: string
   amount: number
-  signature: string
+  signature?: string
 }
 
 export class TransactionInput {
@@ -24,7 +24,7 @@ export class TransactionInput {
   }: CreateTransactionInputParams) {
     this.fromAddress = fromAddress
     this.amount = amount
-    this.signature = signature
+    this.signature = signature || ''
   }
 
   getFromAddress(): string {
@@ -43,7 +43,6 @@ export class TransactionInput {
   }
 
   private validateSignature(): void {
-    console.log('this.signature', this.signature)
     if (!this.signature) {
       throw new ValidationError('Signature is required')
     }
@@ -57,7 +56,6 @@ export class TransactionInput {
 
   private validateHash(): void {
     const hash = Buffer.from(this.generateHash(), 'hex')
-    console.log(this.fromAddress)
     const isValid = ECPair.fromPublicKey(
       Buffer.from(this.fromAddress, 'hex'),
     ).verify(hash, Buffer.from(this.signature, 'hex'))

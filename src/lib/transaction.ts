@@ -66,8 +66,6 @@ export class Transaction {
   }
 
   private validateHash(): void {
-    console.log(this.hash)
-    console.log(this.generateHash())
     if (this.hash !== this.generateHash()) {
       throw new ValidationError('Invalid transaction hash')
     }

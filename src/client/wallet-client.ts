@@ -1,9 +1,11 @@
 import { stdin, stdout } from 'node:process'
 import readline from 'node:readline/promises'
 
-import axios from 'axios'
+import axios, { isAxiosError } from 'axios'
 
 import { env } from '../env'
+import { Transaction } from '../lib/transaction'
+import { TransactionInput } from '../lib/transaction-input'
 import { Wallet } from '../lib/wallet'
 
 const { BLOCKCHAIN_SERVER_URL } = env
@@ -73,33 +75,49 @@ async function sendTransaction(): Promise<void> {
     await preMenu()
   }
 
-  // TODO: send transaction
+  console.log('Your wallet is', myWalletPublicKey)
+  const toWallet = await rl.question('To wallet: ')
 
-  // rl.question('Enter the receiver public key: ', (to) => {
-  //   rl.question('Enter the amount: ', (amount) => {
-  //     axios
-  //       .post(`${BLOCKCHAIN_SERVER_URL}/transactions`, {
-  //         from: myWalletPublicKey,
-  //         to,
-  //         amount: Number(amount),
-  //       })
-  //       .then(() => {
-  //         console.log('Transaction sent!')
-  //       })
-  //       .catch((error) => {
-  //         console.error('Error sending transaction:', error)
-  //       })
-  //       .finally(() => {
-  //         menu()
-  //       })
-  //   })
-  // })
+  if (toWallet.length !== 66) {
+    console.log('Invalid wallet')
+    await preMenu()
+  }
+
+  const amountStr = await rl.question('Enter the amount: ')
+  const amount = parseInt(amountStr)
+
+  if (!amount) {
+    console.log('Invalid amount')
+    await preMenu()
+  }
+
+  try {
+    // TODO: balance validation
+
+    const txInput = new TransactionInput({
+      fromAddress: myWalletPublicKey,
+      amount,
+    })
+    txInput.sign(myWalletPrivateKey)
+
+    const tx = new Transaction({ to: toWallet, txInput })
+
+    await axios.post(`${BLOCKCHAIN_SERVER_URL}/transactions`, tx)
+
+    console.log('Transaction accepted. Waiting for the miners...')
+  } catch (error) {
+    if (isAxiosError(error)) {
+      console.error(error.response?.data)
+    } else {
+      console.error((error as Error).message)
+    }
+  }
+
+  await preMenu()
 }
 
 async function preMenu(): Promise<void> {
-  console.clear()
-
-  await rl.question('Press any key to continue...')
+  await rl.question('\nPress any key to continue...')
   await menu()
 }
 
@@ -117,7 +135,8 @@ async function menu(): Promise<void> {
   console.log('1. Create wallet')
   console.log('2. Recover wallet')
   console.log('3. Balance')
-  console.log('4. Send transaction\n')
+  console.log('4. Send transaction')
+  console.log('0. Exit\n')
 
   const choice = await rl.question('Choose your option: ')
 
@@ -133,6 +152,10 @@ async function menu(): Promise<void> {
       break
     case '4':
       await sendTransaction()
+      break
+    case '0':
+      console.log('Goodbye!')
+      process.exit(0)
       break
     default: {
       console.log('Invalid option')

@@ -102,8 +102,29 @@ export class Blockchain {
     }
   }
 
+  private validatePendingTransactions(transaction: Transaction): void {
+    const txInput = transaction.getTxInput()
+
+    if (!txInput) {
+      return
+    }
+
+    const from = txInput.getFromAddress()
+    const pendingTx = this.mempool
+      .map((tx) => tx.getTxInput())
+      .filter((txInput) => txInput?.getFromAddress() === from)
+
+    if (pendingTx.length > 0) {
+      throw new ValidationError('This wallet has a pending transaction')
+    }
+
+    // TODO: validar origens dos fundos
+  }
+
   addTransaction(transaction: Transaction): void {
     try {
+      this.validatePendingTransactions(transaction)
+
       transaction.validate()
 
       this.validateTransactionInBlocks(transaction.getHash())
