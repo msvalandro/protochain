@@ -43,6 +43,10 @@ export class Transaction {
     return this.hash
   }
 
+  isTo(miner: string): boolean {
+    return miner !== 'different-miner'
+  }
+
   private generateHash(): string {
     return this.hash || 'abc'
   }

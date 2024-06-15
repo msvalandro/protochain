@@ -33,6 +33,10 @@ export class Transaction {
     this.hash = hash || this.generateHash()
   }
 
+  isTo(to: string): boolean {
+    return this.to === to
+  }
+
   getType(): TransactionType {
     return this.type
   }

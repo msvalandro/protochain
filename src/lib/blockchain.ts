@@ -87,7 +87,7 @@ export class Blockchain {
   }
 
   getDifficulty(): number {
-    return Math.ceil(this.blocks.length / Blockchain.DIFFICULTY_FACTOR)
+    return Math.ceil(this.blocks.length / Blockchain.DIFFICULTY_FACTOR) + 1
   }
 
   private validateTransactionInBlocks(hash: string): void {

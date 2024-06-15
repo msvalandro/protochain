@@ -83,4 +83,10 @@ describe('Transaction tests', () => {
       transaction.validate()
     }).toThrow('Invalid transaction hash')
   })
+
+  it('should returns true if block is to given wallet', () => {
+    const transaction = createTransaction()
+
+    expect(transaction.isTo('mock-wallet')).toBe(true)
+  })
 })

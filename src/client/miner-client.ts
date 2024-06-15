@@ -3,13 +3,13 @@ import axios, { isAxiosError } from 'axios'
 import { env } from '../env'
 import { Block } from '../lib/block'
 import { BlockInfo } from '../lib/block-info'
+import { Transaction } from '../lib/transaction'
+import { TransactionType } from '../lib/transaction-type'
+import { Wallet } from '../lib/wallet'
 
-const minerWallet = {
-  privateKey: '123456',
-  publicKey: 'msvalandro',
-}
+const minerWallet = new Wallet(env.WALLET_PRIVATE_KEY)
 
-console.log('Logged as', minerWallet.publicKey)
+console.log('Logged as', minerWallet.getPublicKey())
 
 let totalMined = 0
 
@@ -33,11 +33,24 @@ async function mine(): Promise<void> {
   const { index, previousHash, transactions, difficulty } =
     responseData.block as BlockInfo
 
-  const block = new Block({ index, previousHash, transactions })
+  const block = new Block({
+    index,
+    previousHash,
+    transactions,
+    miner: minerWallet.getPublicKey(),
+  })
+
+  block.addTransaction(
+    new Transaction({
+      to: minerWallet.getPublicKey(),
+      type: TransactionType.FEE,
+    }),
+  )
+  block.generateHash()
 
   console.log('Start mining block #', block.getIndex())
 
-  block.mine(difficulty, minerWallet.publicKey)
+  block.mine(difficulty, minerWallet.getPublicKey())
 
   console.log('Block mined! Sending to blockchain...')
 

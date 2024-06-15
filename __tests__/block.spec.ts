@@ -14,7 +14,7 @@ interface CreateBlockParams {
 }
 
 describe('Block tests', () => {
-  const exampleDifficulty = 0
+  const exampleDifficulty = 1
   const exampleMiner = 'miner'
   let genesis: Block
 
@@ -27,6 +27,7 @@ describe('Block tests', () => {
       index: index ?? 1,
       previousHash: previousHash ?? genesis.getHash(),
       transactions: transactions ?? [
+        new Transaction({ type: TransactionType.FEE, to: 'mock-wallet' }),
         new Transaction({
           to: 'mock-wallet',
           txInput: new TransactionInput({
@@ -62,7 +63,7 @@ describe('Block tests', () => {
 
     expect(block.getIndex()).toBe(1)
     expect(block.getPreviousHash()).toBe(genesis.getHash())
-    expect(block.getTransactions()[0].getTxInput()?.getFromAddress()).toBe(
+    expect(block.getTransactions()[1].getTxInput()?.getFromAddress()).toBe(
       'mock-wallet',
     )
     expect(block.getNonce()).toBe(0)
@@ -184,5 +185,24 @@ describe('Block tests', () => {
     const block = createBlock({ transactions: [transaction] })
 
     expect(block.hasTransaction(transaction.getHash())).toBe(true)
+  })
+
+  it('should add transaction', () => {
+    const transaction = new Transaction({ to: 'mock-wallet' })
+    const block = createBlock()
+
+    block.addTransaction(transaction)
+
+    expect(block.hasTransaction(transaction.getHash())).toBe(true)
+  })
+
+  it('should not validate block with FEE transaction different than miner', () => {
+    const block = createBlock()
+
+    block.mine(exampleDifficulty, 'different-miner')
+
+    expect(() => {
+      block.validate(genesis.getHash(), genesis.getIndex(), exampleDifficulty)
+    }).toThrow('Invalid fee transaction, different from miner')
   })
 })

@@ -57,12 +57,12 @@ export class Block {
       ],
     })
 
-    block.mine(0, 'genesis')
+    block.mine(1, 'genesis')
 
     return block
   }
 
-  private generateHash(): string {
+  generateHash(): string {
     const txs = this.transactions.map((tx) => tx.getHash()).join('')
 
     return sha256(
@@ -111,16 +111,30 @@ export class Block {
     return this.transactions.some((tx) => tx.getHash() === hash)
   }
 
+  addTransaction(transaction: Transaction): void {
+    this.transactions.push(transaction)
+  }
+
   private validateTransactions(): void {
-    const fees = this.transactions.filter(
-      (tx) => tx.getType() === TransactionType.FEE,
-    )
-
-    if (fees.length > 1) {
-      throw new ValidationError('Block contains multiple fee transactions')
-    }
-
     try {
+      const fees = this.transactions.filter(
+        (tx) => tx.getType() === TransactionType.FEE,
+      )
+
+      if (fees.length === 0) {
+        throw new ValidationError('Block does not contain fee transaction')
+      }
+
+      if (fees.length > 1) {
+        throw new ValidationError('Block contains multiple fee transactions')
+      }
+
+      if (!fees[0].isTo(this.miner)) {
+        throw new ValidationError(
+          'Invalid fee transaction, different from miner',
+        )
+      }
+
       this.transactions.forEach((tx) => tx.validate())
     } catch (error) {
       throw new Error(`Invalid block due to invalid transaction. ${error}`)
