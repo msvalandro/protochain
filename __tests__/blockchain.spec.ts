@@ -1,6 +1,7 @@
 import { Block } from '../src/lib/block'
 import { Blockchain } from '../src/lib/blockchain'
 import { Transaction } from '../src/lib/transaction'
+import { TransactionInput } from '../src/lib/transaction-input'
 
 jest.mock('../src/lib/block')
 jest.mock('../src/lib/transaction')
@@ -169,6 +170,20 @@ describe('Blockchain tests', () => {
     expect(() => {
       blockchain.addTransaction(new Transaction({ to: 'mock-wallet' }))
     }).toThrow('Transaction already in mempool')
+  })
+
+  it('should not be able to add transaction if there is a pending transaction on mempool', () => {
+    const blockchain = new Blockchain()
+    const txInput = new TransactionInput({
+      fromAddress: 'mock-from-wallet',
+      amount: 10,
+    })
+
+    blockchain.addTransaction(new Transaction({ to: 'mock-wallet', txInput }))
+
+    expect(() => {
+      blockchain.addTransaction(new Transaction({ to: 'mock-wallet', txInput }))
+    }).toThrow('This wallet has a pending transaction')
   })
 
   it('should not be able to add block with invalid transaction', () => {

@@ -102,9 +102,13 @@ async function sendTransaction(): Promise<void> {
 
     const tx = new Transaction({ to: toWallet, txInput })
 
-    await axios.post(`${BLOCKCHAIN_SERVER_URL}/transactions`, tx)
+    const { data } = await axios.post(
+      `${BLOCKCHAIN_SERVER_URL}/transactions`,
+      tx,
+    )
 
     console.log('Transaction accepted. Waiting for the miners...')
+    console.log('Transaction hash:', data.transaction.hash)
   } catch (error) {
     if (isAxiosError(error)) {
       console.error(error.response?.data)
@@ -112,6 +116,19 @@ async function sendTransaction(): Promise<void> {
       console.error((error as Error).message)
     }
   }
+
+  await preMenu()
+}
+
+async function searchTransaction(): Promise<void> {
+  console.clear()
+
+  const txHash = await rl.question('Enter the transaction hash: ')
+
+  const { data } = await axios.get(
+    `${BLOCKCHAIN_SERVER_URL}/transactions/${txHash}`,
+  )
+  console.log(data)
 
   await preMenu()
 }
@@ -136,6 +153,7 @@ async function menu(): Promise<void> {
   console.log('2. Recover wallet')
   console.log('3. Balance')
   console.log('4. Send transaction')
+  console.log('5. Search transaction')
   console.log('0. Exit\n')
 
   const choice = await rl.question('Choose your option: ')
@@ -152,6 +170,9 @@ async function menu(): Promise<void> {
       break
     case '4':
       await sendTransaction()
+      break
+    case '5':
+      await searchTransaction()
       break
     case '0':
       console.log('Goodbye!')
