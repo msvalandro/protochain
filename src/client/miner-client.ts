@@ -4,7 +4,6 @@ import { env } from '../env'
 import { Block } from '../lib/block'
 import { BlockInfo } from '../lib/block-info'
 
-const BLOCKCHAIN_SERVER = `http://localhost:${env.PORT}`
 const minerWallet = {
   privateKey: '123456',
   publicKey: 'msvalandro',
@@ -18,7 +17,7 @@ async function mine(): Promise<void> {
   console.log('Getting next block info...')
 
   const { data: responseData } = await axios.get(
-    `${BLOCKCHAIN_SERVER}/blocks/next`,
+    `${env.BLOCKCHAIN_SERVER_URL}/blocks/next`,
   )
 
   if (!responseData.block) {
@@ -43,7 +42,7 @@ async function mine(): Promise<void> {
   console.log('Block mined! Sending to blockchain...')
 
   try {
-    await axios.post(`${BLOCKCHAIN_SERVER}/blocks`, {
+    await axios.post(`${env.BLOCKCHAIN_SERVER_URL}/blocks`, {
       index: block.getIndex(),
       previousHash: block.getPreviousHash(),
       transactions: block.getTransactions(),

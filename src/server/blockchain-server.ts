@@ -9,10 +9,12 @@ app.register(blockchainRoutes)
 
 app
   .listen({
-    port: env.PORT,
+    port: env.BLOCKCHAIN_SERVER_PORT,
   })
   .then(() => {
-    console.log(`HTTP Server Running at Port ${env.PORT}! 🚀`)
+    console.log(
+      `HTTP Server Running at BLOCKCHAIN_SERVER_PORT ${env.BLOCKCHAIN_SERVER_PORT}! 🚀`,
+    )
   })
 
 export { app }

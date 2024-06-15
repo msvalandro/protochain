@@ -10,11 +10,20 @@
     "start": "node ./dist/blockchain.js",
     "test": "jest --silent --NODE_ENV=test",
     "miner": "tsx watch ./src/client/miner-client.ts",
-    "wallet": "tsx watch ./src/client/wallet-client.ts"
+    "wallet": "ts-node ./src/client/wallet-client.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^16.4.5",
+    "ecpair": "^2.1.0",
+    "fastify": "^4.27.0",
+    "tiny-secp256k1": "^2.2.3",
+    "zod": "^3.23.8"
+  },
   "devDependencies": {
     "@rocketseat/eslint-config": "^2.2.2",
     "@types/crypto-js": "^4.2.2",
@@ -28,14 +37,5 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.15.2",
     "typescript": "^5.4.5"
-  },
-  "dependencies": {
-    "axios": "^1.7.2",
-    "crypto-js": "^4.2.0",
-    "dotenv": "^16.4.5",
-    "ecpair": "^2.1.0",
-    "fastify": "^4.27.0",
-    "tiny-secp256k1": "^2.2.3",
-    "zod": "^3.23.8"
   }
 }
