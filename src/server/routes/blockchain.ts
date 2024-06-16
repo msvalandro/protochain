@@ -5,6 +5,7 @@ import { env } from '../../env'
 import { Block } from '../../lib/block'
 import { Blockchain } from '../../lib/blockchain'
 import { Transaction } from '../../lib/transaction'
+import { TransactionOutput } from '../../lib/transaction-output'
 import { TransactionType } from '../../lib/transaction-type'
 import { ValidationError } from '../../lib/validation-error'
 import { Wallet } from '../../lib/wallet'
@@ -50,12 +51,19 @@ export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
       transactions: z.array(
         z.object({
           type: z.enum([TransactionType.FEE, TransactionType.REGULAR]),
-          to: z.string(),
-          txInput: z.optional(
+          txInputs: z.array(
             z.object({
               fromAddress: z.string(),
               amount: z.number(),
               signature: z.string(),
+              previousTx: z.string(),
+            }),
+          ),
+          txOutputs: z.array(
+            z.object({
+              toAddress: z.string(),
+              amount: z.number(),
+              txHash: z.string(),
             }),
           ),
           timestamp: z.number(),
@@ -133,12 +141,19 @@ export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
   app.post('/transactions', (request, reply) => {
     const createTransactionBodySchema = z.object({
       // type: z.enum([TransactionType.FEE, TransactionType.REGULAR]),
-      to: z.string(),
-      txInput: z.optional(
+      txInputs: z.array(
         z.object({
           fromAddress: z.string(),
           amount: z.number(),
+          previousTx: z.string(),
           signature: z.optional(z.string()),
+        }),
+      ),
+      txOutputs: z.array(
+        z.object({
+          toAddress: z.string(),
+          amount: z.number(),
+          txHash: z.string(),
         }),
       ),
       // timestamp: z.number(),
@@ -146,8 +161,10 @@ export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
     })
 
     try {
-      const { to, txInput } = createTransactionBodySchema.parse(request.body)
-      const transaction = new Transaction({ to, txInput })
+      const { txInputs, txOutputs } = createTransactionBodySchema.parse(
+        request.body,
+      )
+      const transaction = new Transaction({ txInputs, txOutputs })
 
       blockchain.addTransaction(transaction)
 
@@ -165,6 +182,23 @@ export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
       }
 
       return reply.status(500).send()
+    }
+  })
+
+  app.get('/wallet/:wallet', (request) => {
+    const getWalletParamsSchema = z.object({ wallet: z.string() })
+    const { wallet } = getWalletParamsSchema.parse(request.params)
+
+    return {
+      balance: 10,
+      fee: blockchain.getFeePerTx(),
+      utxo: [
+        new TransactionOutput({
+          amount: 10,
+          toAddress: wallet,
+          txHash: '123',
+        }),
+      ],
     }
   })
 }

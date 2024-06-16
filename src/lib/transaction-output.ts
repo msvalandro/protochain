@@ -27,12 +27,16 @@ export class TransactionOutput {
     return this.amount
   }
 
+  getTxHash(): string {
+    return this.txHash
+  }
+
   setTxHash(txHash: string): void {
     this.txHash = txHash
   }
 
   generateHash(): string {
-    return sha256(this.toAddress + this.amount + this.txHash).toString()
+    return sha256(this.toAddress + this.amount).toString()
   }
 
   validate(): void {

@@ -6,6 +6,7 @@ import axios, { isAxiosError } from 'axios'
 import { env } from '../env'
 import { Transaction } from '../lib/transaction'
 import { TransactionInput } from '../lib/transaction-input'
+import { TransactionOutput } from '../lib/transaction-output'
 import { Wallet } from '../lib/wallet'
 
 const { BLOCKCHAIN_SERVER_URL } = env
@@ -92,15 +93,31 @@ async function sendTransaction(): Promise<void> {
   }
 
   try {
-    // TODO: balance validation
+    const { data: walletData } = await axios.get(
+      `${BLOCKCHAIN_SERVER_URL}/wallet/${myWalletPublicKey}`,
+    )
+    const { balance, fee, utxo } = walletData as {
+      balance: number
+      fee: number
+      utxo: { txHash: string }[]
+    }
+
+    if (balance < amount + fee) {
+      console.error('Insufficient funds')
+      await preMenu()
+      return
+    }
 
     const txInput = new TransactionInput({
       fromAddress: myWalletPublicKey,
       amount,
+      previousTx: utxo[0].txHash,
     })
     txInput.sign(myWalletPrivateKey)
 
-    const tx = new Transaction({ to: toWallet, txInput })
+    const txOutput = new TransactionOutput({ toAddress: toWallet, amount })
+    const tx = new Transaction({ txInputs: [txInput], txOutputs: [txOutput] })
+    tx.setTransactionOutputHash(0)
 
     const { data } = await axios.post(
       `${BLOCKCHAIN_SERVER_URL}/transactions`,
@@ -128,7 +145,6 @@ async function searchTransaction(): Promise<void> {
   const { data } = await axios.get(
     `${BLOCKCHAIN_SERVER_URL}/transactions/${txHash}`,
   )
-  console.log(data)
 
   await preMenu()
 }

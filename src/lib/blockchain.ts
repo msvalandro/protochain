@@ -27,7 +27,7 @@ export class Blockchain {
     return this.blocks[this.blocks.length - 1]
   }
 
-  private getFeePerTx(): number {
+  getFeePerTx(): number {
     return 1
   }
 
@@ -104,13 +104,13 @@ export class Blockchain {
 
   private validatePendingTransactions(transaction: Transaction): void {
     const txInputs = transaction.getTxInputs()
-
     const from = txInputs[0].getFromAddress()
+
     const pendingTx = this.mempool
       .filter((tx) => tx.getTxInputs().length > 0)
       .map((tx) => tx.getTxInputs())
       .flat()
-      .filter((txInput) => txInput!.getFromAddress() === from)
+      .filter((txInput) => txInput.getFromAddress() === from)
 
     if (pendingTx.length > 0) {
       throw new ValidationError('This wallet has a pending transaction')

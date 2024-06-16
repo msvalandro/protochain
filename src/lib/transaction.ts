@@ -89,7 +89,7 @@ export class Transaction {
   }
 
   private validateTransactionInputs(): void {
-    if (!this.txInputs.length) {
+    if (this.type !== TransactionType.FEE && !this.txInputs.length) {
       throw new ValidationError('Invalid transaction transaction inputs')
     }
 
@@ -111,6 +111,10 @@ export class Transaction {
   }
 
   private validateTransactionsAmount(): void {
+    if (this.type === TransactionType.FEE) {
+      return
+    }
+
     const inputAmount = this.txInputs.reduce(
       (acc, txInput) => acc + txInput.getAmount(),
       0,
@@ -129,7 +133,7 @@ export class Transaction {
 
   private validateTransactionOutputsHash(): void {
     this.txOutputs.forEach((txOutput) => {
-      if (txOutput.generateHash() !== this.hash) {
+      if (txOutput.getTxHash() !== this.hash) {
         throw new ValidationError('Invalid transaction output hash')
       }
     })

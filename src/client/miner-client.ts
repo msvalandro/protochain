@@ -4,6 +4,7 @@ import { env } from '../env'
 import { Block } from '../lib/block'
 import { BlockInfo } from '../lib/block-info'
 import { Transaction } from '../lib/transaction'
+import { TransactionOutput } from '../lib/transaction-output'
 import { TransactionType } from '../lib/transaction-type'
 import { Wallet } from '../lib/wallet'
 
@@ -39,13 +40,18 @@ async function mine(): Promise<void> {
     transactions,
     miner: minerWallet.getPublicKey(),
   })
+  const rewardTransaction = new Transaction({
+    txOutputs: [
+      new TransactionOutput({
+        toAddress: minerWallet.getPublicKey(),
+        amount: 10,
+      }),
+    ],
+    type: TransactionType.FEE,
+  })
 
-  block.addTransaction(
-    new Transaction({
-      to: minerWallet.getPublicKey(),
-      type: TransactionType.FEE,
-    }),
-  )
+  rewardTransaction.setTransactionOutputHash(0)
+  block.addTransaction(rewardTransaction)
   block.generateHash()
 
   console.log('Start mining block #', block.getIndex())
