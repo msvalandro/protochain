@@ -1,5 +1,6 @@
 import sha256 from 'crypto-js/sha256'
 
+import { Blockchain } from './blockchain'
 import { CreateTransactionParams, Transaction } from './transaction'
 import { TransactionOutput } from './transaction-output'
 import { TransactionType } from './transaction-type'
@@ -46,7 +47,7 @@ export class Block {
   }
 
   static genesis(miner: string): Block {
-    const amount = 10
+    const amount = Blockchain.getRewardAmount()
 
     const transaction = new Transaction({
       type: TransactionType.FEE,
@@ -119,7 +120,7 @@ export class Block {
     this.transactions.push(transaction)
   }
 
-  private validateTransactions(): void {
+  private validateTransactions(difficulty: number, feePerTx: number): void {
     try {
       const fees = this.transactions.filter(
         (tx) => tx.getType() === TransactionType.FEE,
@@ -139,7 +140,11 @@ export class Block {
         )
       }
 
-      this.transactions.forEach((tx) => tx.validate())
+      const totalFees =
+        feePerTx *
+        this.transactions.filter((tx) => tx.getType() !== TransactionType.FEE)
+          .length
+      this.transactions.forEach((tx) => tx.validate(difficulty, totalFees))
     } catch (error) {
       throw new Error(`Invalid block due to invalid transaction. ${error}`)
     }
@@ -179,9 +184,10 @@ export class Block {
     previousHash: string,
     previousIndex: number,
     difficulty: number,
+    feePerTx: number,
   ): void {
     try {
-      this.validateTransactions()
+      this.validateTransactions(difficulty, feePerTx)
       this.validateTimestamp()
       this.validatePreviousBlock(previousHash, previousIndex)
       this.validateMining()

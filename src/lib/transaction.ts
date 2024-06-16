@@ -1,5 +1,6 @@
 import sha256 from 'crypto-js/sha256'
 
+import { Blockchain } from './blockchain'
 import {
   CreateTransactionInputParams,
   TransactionInput,
@@ -77,6 +78,23 @@ export class Transaction {
     return this.hash
   }
 
+  getFee(): number {
+    if (!this.txInputs.length) {
+      return 0
+    }
+
+    const inputSum = this.txInputs.reduce(
+      (acc, txInput) => acc + txInput.getAmount(),
+      0,
+    )
+    const outputSum = this.txOutputs.reduce(
+      (acc, txOutput) => acc + txOutput.getAmount(),
+      0,
+    )
+
+    return inputSum - outputSum
+  }
+
   setTransactionOutputHash(index: number): void {
     this.txOutputs[index].setTxHash(this.hash)
   }
@@ -143,14 +161,24 @@ export class Transaction {
     })
   }
 
-  validate(): void {
+  private validateFeesAndReward(difficulty: number, totalFees: number): void {
+    if (this.type === TransactionType.FEE) {
+      const fee = this.txOutputs[0].getAmount()
+
+      if (fee > Blockchain.getRewardAmount(difficulty) + totalFees) {
+        throw new ValidationError('Invalid transaction reward')
+      }
+    }
+  }
+
+  validate(difficulty: number, totalFees: number): void {
     try {
       this.validateTransactionInputs()
       this.validateTransactionOutputs()
       this.validateHash()
       this.validateTransactionsAmount()
       this.validateTransactionOutputsHash()
-
+      this.validateFeesAndReward(difficulty, totalFees)
       // TODO: validar taxas e recomepensas quando transaction fee
     } catch (error) {
       console.error((error as ValidationError).message)

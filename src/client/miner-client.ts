@@ -3,6 +3,7 @@ import axios, { isAxiosError } from 'axios'
 import { env } from '../env'
 import { Block } from '../lib/block'
 import { BlockInfo } from '../lib/block-info'
+import { Blockchain } from '../lib/blockchain'
 import { Transaction } from '../lib/transaction'
 import { TransactionOutput } from '../lib/transaction-output'
 import { TransactionType } from '../lib/transaction-type'
@@ -31,8 +32,14 @@ async function mine(): Promise<void> {
     return
   }
 
-  const { index, previousHash, transactions, difficulty } =
-    responseData.block as BlockInfo
+  const {
+    index,
+    previousHash,
+    transactions,
+    difficulty,
+    maxDifficulty,
+    feePerTx,
+  } = responseData.block as BlockInfo
 
   const block = new Block({
     index,
@@ -40,11 +47,34 @@ async function mine(): Promise<void> {
     transactions,
     miner: minerWallet.getPublicKey(),
   })
+
+  let rewardAmount = 0
+
+  if (difficulty <= maxDifficulty) {
+    rewardAmount += Blockchain.getRewardAmount(difficulty)
+  }
+
+  const fees = block
+    .getTransactions()
+    .map((tx) => tx.getFee())
+    .reduce((a, b) => a + b, 0)
+  const feeCheck = block.getTransactions().length * feePerTx
+
+  if (fees < feeCheck) {
+    console.error('Low fees. Await for more transactions')
+    setTimeout(() => {
+      mine()
+    }, 5000)
+    return
+  }
+
+  rewardAmount += fees
+
   const rewardTransaction = new Transaction({
     txOutputs: [
       new TransactionOutput({
         toAddress: minerWallet.getPublicKey(),
-        amount: 10,
+        amount: rewardAmount,
       }),
     ],
     type: TransactionType.FEE,

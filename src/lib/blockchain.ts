@@ -21,6 +21,12 @@ export class Blockchain {
     this.blocks = [Block.genesis(miner)]
   }
 
+  static getRewardAmount(
+    difficulty: number = Math.ceil(0 / Blockchain.DIFFICULTY_FACTOR) + 1,
+  ): number {
+    return (64 - difficulty) * 10
+  }
+
   getBlock(hash: string): Block | undefined {
     return this.blocks.find((block) => block.getHash() === hash)
   }
@@ -138,9 +144,8 @@ export class Blockchain {
   addTransaction(transaction: Transaction): void {
     try {
       this.validatePendingTransactions(transaction)
-      // TODO: validar taxas
 
-      transaction.validate()
+      transaction.validate(this.getDifficulty(), this.getFeePerTx())
 
       this.validateTransactionInBlocks(transaction.getHash())
       this.validateTransactionInMempool(transaction.getHash())
@@ -163,6 +168,7 @@ export class Blockchain {
         nextBlock.previousHash,
         nextBlock.index - 1,
         nextBlock.difficulty,
+        nextBlock.feePerTx,
       )
 
       const txs = block
@@ -197,6 +203,7 @@ export class Blockchain {
           previousBlock.getHash(),
           previousBlock.getIndex(),
           this.getDifficulty(),
+          this.getFeePerTx(),
         )
       } catch (error) {
         console.error(
