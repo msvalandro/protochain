@@ -179,7 +179,6 @@ export class Transaction {
       this.validateTransactionsAmount()
       this.validateTransactionOutputsHash()
       this.validateFeesAndReward(difficulty, totalFees)
-      // TODO: validar taxas e recomepensas quando transaction fee
     } catch (error) {
       console.error((error as ValidationError).message)
       throw error

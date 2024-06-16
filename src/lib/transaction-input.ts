@@ -2,7 +2,6 @@ import sha256 from 'crypto-js/sha256'
 import { ECPairFactory } from 'ecpair'
 import * as ecc from 'tiny-secp256k1'
 
-import { TransactionOutput } from './transaction-output'
 import { ValidationError } from './validation-error'
 
 const ECPair = ECPairFactory(ecc)
