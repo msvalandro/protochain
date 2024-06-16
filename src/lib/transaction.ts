@@ -69,6 +69,10 @@ export class Transaction {
     return this.txInputs.slice()
   }
 
+  getTxOutputs(): TransactionOutput[] {
+    return this.txOutputs.slice()
+  }
+
   getHash(): string {
     return this.hash
   }

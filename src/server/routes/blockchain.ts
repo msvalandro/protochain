@@ -5,7 +5,6 @@ import { env } from '../../env'
 import { Block } from '../../lib/block'
 import { Blockchain } from '../../lib/blockchain'
 import { Transaction } from '../../lib/transaction'
-import { TransactionOutput } from '../../lib/transaction-output'
 import { TransactionType } from '../../lib/transaction-type'
 import { ValidationError } from '../../lib/validation-error'
 import { Wallet } from '../../lib/wallet'
@@ -13,6 +12,8 @@ import { Wallet } from '../../lib/wallet'
 export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
   const wallet = new Wallet(env.BLOCKCHAIN_OWNER_WALLET)
   const blockchain = new Blockchain(wallet.getPublicKey())
+
+  console.log('🪪 Blockchain owner wallet:', wallet.getPublicKey())
 
   app.get('/status', () => {
     return {
@@ -185,20 +186,14 @@ export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
     }
   })
 
-  app.get('/wallet/:wallet', (request) => {
+  app.get('/wallets/:wallet', (request) => {
     const getWalletParamsSchema = z.object({ wallet: z.string() })
     const { wallet } = getWalletParamsSchema.parse(request.params)
 
-    return {
-      balance: 10,
-      fee: blockchain.getFeePerTx(),
-      utxo: [
-        new TransactionOutput({
-          amount: 10,
-          toAddress: wallet,
-          txHash: '123',
-        }),
-      ],
-    }
+    const utxo = blockchain.getUTXO(wallet)
+    const balance = blockchain.getBalance(wallet)
+    const fee = blockchain.getFeePerTx()
+
+    return { balance, fee, utxo }
   })
 }

@@ -64,8 +64,12 @@ async function balance(): Promise<void> {
     return
   }
 
+  const { data } = await axios.get(
+    `${BLOCKCHAIN_SERVER_URL}/wallets/${myWalletPublicKey}`,
+  )
+  console.log('Balance:', data.balance)
+
   await preMenu()
-  // TODO: implement balance
 }
 
 async function sendTransaction(): Promise<void> {
@@ -94,12 +98,12 @@ async function sendTransaction(): Promise<void> {
 
   try {
     const { data: walletData } = await axios.get(
-      `${BLOCKCHAIN_SERVER_URL}/wallet/${myWalletPublicKey}`,
+      `${BLOCKCHAIN_SERVER_URL}/wallets/${myWalletPublicKey}`,
     )
     const { balance, fee, utxo } = walletData as {
       balance: number
       fee: number
-      utxo: { txHash: string }[]
+      utxo: { toAddress: string; amount: number; txHash: string }[]
     }
 
     if (balance < amount + fee) {
@@ -108,16 +112,31 @@ async function sendTransaction(): Promise<void> {
       return
     }
 
-    const txInput = new TransactionInput({
-      fromAddress: myWalletPublicKey,
-      amount,
-      previousTx: utxo[0].txHash,
+    const txInputs = utxo.map((tx) => {
+      return new TransactionInput({
+        fromAddress: tx.toAddress,
+        amount: tx.amount,
+        previousTx: tx.txHash,
+      })
     })
-    txInput.sign(myWalletPrivateKey)
+    txInputs.forEach((txInput) => txInput.sign(myWalletPrivateKey))
 
-    const txOutput = new TransactionOutput({ toAddress: toWallet, amount })
-    const tx = new Transaction({ txInputs: [txInput], txOutputs: [txOutput] })
-    tx.setTransactionOutputHash(0)
+    const txOutputs: TransactionOutput[] = []
+    txOutputs.push(new TransactionOutput({ toAddress: toWallet, amount }))
+
+    const remainingBalance = balance - amount - fee
+    txOutputs.push(
+      new TransactionOutput({
+        toAddress: myWalletPublicKey,
+        amount: remainingBalance,
+      }),
+    )
+
+    const tx = new Transaction({ txInputs, txOutputs })
+    tx.getTxOutputs().forEach((_, index) => tx.setTransactionOutputHash(index))
+
+    console.log(tx)
+    console.log('Remaining balance:', remainingBalance)
 
     const { data } = await axios.post(
       `${BLOCKCHAIN_SERVER_URL}/transactions`,
@@ -145,6 +164,7 @@ async function searchTransaction(): Promise<void> {
   const { data } = await axios.get(
     `${BLOCKCHAIN_SERVER_URL}/transactions/${txHash}`,
   )
+  console.log(data)
 
   await preMenu()
 }
