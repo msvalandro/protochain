@@ -1,6 +1,7 @@
 import sha256 from 'crypto-js/sha256'
 
 import { CreateTransactionParams, Transaction } from './transaction'
+import { TransactionOutput } from './transaction-output'
 import { TransactionType } from './transaction-type'
 import { ValidationError } from './validation-error'
 
@@ -44,20 +45,23 @@ export class Block {
     this.hash = hash ?? this.generateHash()
   }
 
-  static genesis(): Block {
+  static genesis(miner: string): Block {
+    const amount = 10
+
+    const transaction = new Transaction({
+      type: TransactionType.FEE,
+      txOutputs: [new TransactionOutput({ toAddress: miner, amount })],
+    })
+    transaction.setTransactionOutputHash(0)
+
     const block = new Block({
       index: 0,
       previousHash:
         '0000000000000000000000000000000000000000000000000000000000000000',
-      transactions: [
-        new Transaction({
-          type: TransactionType.FEE,
-          to: 'genesis-block',
-        }),
-      ],
+      transactions: [transaction],
     })
 
-    block.mine(1, 'genesis')
+    block.mine(1, miner)
 
     return block
   }
@@ -166,7 +170,7 @@ export class Block {
   }
 
   private validateMining(): void {
-    if (!this.nonce || !this.miner) {
+    if (this.nonce < 1 || !this.miner) {
       throw new ValidationError('Block not mined')
     }
   }

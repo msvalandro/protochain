@@ -7,6 +7,7 @@ const envSchema = z.object({
   BLOCKCHAIN_SERVER_PORT: z.coerce.number().default(3333),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('production'),
   WALLET_PRIVATE_KEY: z.string(),
+  BLOCKCHAIN_OWNER_WALLET: z.string(),
 })
 
 const _env = envSchema.safeParse(process.env)

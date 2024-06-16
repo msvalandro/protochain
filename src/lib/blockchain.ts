@@ -14,9 +14,9 @@ export class Blockchain {
   static readonly DIFFICULTY_FACTOR = 5
   static readonly MAX_DIFFICULTY = 62
 
-  constructor() {
+  constructor(miner: string) {
     this.mempool = []
-    this.blocks = [Block.genesis()]
+    this.blocks = [Block.genesis(miner)]
   }
 
   getBlock(hash: string): Block | undefined {
@@ -103,15 +103,13 @@ export class Blockchain {
   }
 
   private validatePendingTransactions(transaction: Transaction): void {
-    const txInput = transaction.getTxInput()
+    const txInputs = transaction.getTxInputs()
 
-    if (!txInput) {
-      return
-    }
-
-    const from = txInput.getFromAddress()
+    const from = txInputs[0].getFromAddress()
     const pendingTx = this.mempool
-      .map((tx) => tx.getTxInput())
+      .filter((tx) => tx.getTxInputs().length > 0)
+      .map((tx) => tx.getTxInputs())
+      .flat()
       .filter((txInput) => txInput!.getFromAddress() === from)
 
     if (pendingTx.length > 0) {
@@ -138,12 +136,16 @@ export class Blockchain {
 
   addBlock(block: Block): void {
     try {
-      const previousBlock = this.getLastBlock()
+      const nextBlock = this.getNextBlock()
+
+      if (!nextBlock) {
+        throw new ValidationError('No block info to be added')
+      }
 
       block.validate(
-        previousBlock.getHash(),
-        previousBlock.getIndex(),
-        this.getDifficulty(),
+        nextBlock.previousHash,
+        nextBlock.index - 1,
+        nextBlock.difficulty,
       )
 
       const txs = block

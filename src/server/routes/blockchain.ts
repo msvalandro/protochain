@@ -1,14 +1,17 @@
 import { FastifyInstance } from 'fastify'
 import { z, ZodError } from 'zod'
 
+import { env } from '../../env'
 import { Block } from '../../lib/block'
 import { Blockchain } from '../../lib/blockchain'
 import { Transaction } from '../../lib/transaction'
 import { TransactionType } from '../../lib/transaction-type'
 import { ValidationError } from '../../lib/validation-error'
+import { Wallet } from '../../lib/wallet'
 
 export async function blockchainRoutes(app: FastifyInstance): Promise<void> {
-  const blockchain = new Blockchain()
+  const wallet = new Wallet(env.BLOCKCHAIN_OWNER_WALLET)
+  const blockchain = new Blockchain(wallet.getPublicKey())
 
   app.get('/status', () => {
     return {

@@ -73,6 +73,10 @@ export class Transaction {
     return this.hash
   }
 
+  setTransactionOutputHash(index: number): void {
+    this.txOutputs[index].setTxHash(this.hash)
+  }
+
   private generateHash(): string {
     const from = this.txInputs
       .map((txInput) => txInput.getSignature())

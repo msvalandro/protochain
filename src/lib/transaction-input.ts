@@ -9,21 +9,25 @@ const ECPair = ECPairFactory(ecc)
 export interface CreateTransactionInputParams {
   fromAddress: string
   amount: number
+  previousTx?: string
   signature?: string
 }
 
 export class TransactionInput {
   private fromAddress: string
   private amount: number
+  private previousTx: string
   private signature: string
 
   constructor({
     fromAddress,
     amount,
+    previousTx,
     signature,
   }: CreateTransactionInputParams) {
     this.fromAddress = fromAddress
     this.amount = amount
+    this.previousTx = previousTx || ''
     this.signature = signature || ''
   }
 
@@ -40,7 +44,7 @@ export class TransactionInput {
   }
 
   generateHash(): string {
-    return sha256(this.fromAddress + this.amount).toString()
+    return sha256(this.fromAddress + this.amount + this.previousTx).toString()
   }
 
   sign(privateKey: string): void {
@@ -48,6 +52,12 @@ export class TransactionInput {
     const hash = this.generateHash()
 
     this.signature = keyPair.sign(Buffer.from(hash, 'hex')).toString('hex')
+  }
+
+  private validatePreviousTx(): void {
+    if (!this.previousTx) {
+      throw new ValidationError('Previous transaction is required')
+    }
   }
 
   private validateSignature(): void {
@@ -75,6 +85,7 @@ export class TransactionInput {
 
   validate(): void {
     try {
+      this.validatePreviousTx()
       this.validateSignature()
       this.validateAmount()
       this.validateHash()
