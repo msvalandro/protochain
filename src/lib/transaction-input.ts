@@ -31,6 +31,14 @@ export class TransactionInput {
     return this.fromAddress
   }
 
+  getAmount(): number {
+    return this.amount
+  }
+
+  getSignature(): string {
+    return this.signature
+  }
+
   generateHash(): string {
     return sha256(this.fromAddress + this.amount).toString()
   }
