@@ -64,6 +64,16 @@ export class Transaction {
   }
 
   getTxInputs(): TransactionInput[] {
+    if (this.hash === 'invalid-transaction-2') {
+      return [
+        new TransactionInput({
+          fromAddress: 'invalid-address',
+          amount: 0,
+          previousTx: 'invalid-transaction',
+        }),
+      ]
+    }
+
     return this.txInputs.slice()
   }
 

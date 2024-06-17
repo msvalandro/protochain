@@ -105,6 +105,7 @@ export class Blockchain {
   }
 
   private validateTransactionInMempool(hash: string): void {
+    console.log(this.mempool)
     if (this.mempool.some((tx) => tx.getHash() === hash)) {
       throw new ValidationError('Transaction already in mempool')
     }

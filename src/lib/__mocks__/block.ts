@@ -1,6 +1,7 @@
 import { TransactionType } from '../transaction-type'
 import { Blockchain } from './blockchain'
 import { CreateTransactionParams, Transaction } from './transaction'
+import { TransactionInput } from './transaction-input'
 import { TransactionOutput } from './transaction-output'
 
 interface CreateBlockParams {
@@ -77,7 +78,25 @@ export class Block {
   }
 
   getTransactions(): Transaction[] {
-    return this.transactions.slice()
+    // mock invalid tx in block
+    if (this.timestamp === 99) {
+      return [new Transaction({}), new Transaction({})]
+    }
+
+    return [
+      new Transaction({
+        txInputs: [
+          new TransactionInput({
+            fromAddress: 'mock-address',
+            amount: 100,
+          }),
+        ],
+        txOutputs: [
+          new TransactionOutput({ toAddress: 'mock-address', amount: 80 }),
+          new TransactionOutput({ toAddress: 'mock-address', amount: 100 }),
+        ],
+      }),
+    ]
   }
 
   getNonce(): number {
@@ -101,14 +120,18 @@ export class Block {
   }
 
   hasTransaction(hash: string): boolean {
-    return this.transactions.some((tx) => tx.getHash() === hash)
+    return hash === 'invalid-transaction'
   }
 
   addTransaction(transaction: Transaction): void {
     this.transactions.push(transaction)
   }
 
-  validate(): void {}
+  validate(hash: string): void {
+    if (hash === 'invalid-hash') {
+      throw new Error('Invalid block')
+    }
+  }
 
   mine(): void {}
 }
