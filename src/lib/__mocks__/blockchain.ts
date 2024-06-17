@@ -1,5 +1,6 @@
 import { BlockInfo } from '../block-info'
 import { TransactionSearch } from '../transaction-search'
+import { ValidationError } from '../validation-error'
 import { Block } from './block'
 import { Transaction } from './transaction'
 import { TransactionOutput } from './transaction-output'
@@ -24,8 +25,12 @@ export class Blockchain {
     return (64 - difficulty) * 10
   }
 
-  getBlock(hash: string): Block | undefined {
-    return this.blocks.find((block) => block.getHash() === hash)
+  getBlock(): Block {
+    return new Block({
+      index: 1,
+      previousHash: 'mock-previous-hash',
+      transactions: [],
+    })
   }
 
   getLastBlock(): Block {
@@ -37,10 +42,6 @@ export class Blockchain {
   }
 
   getNextBlock(): BlockInfo | null {
-    if (!this.mempool.length) {
-      return null
-    }
-
     return {
       index: 1,
       previousHash: 'mock-last-block-hash',
@@ -71,9 +72,18 @@ export class Blockchain {
     return Math.ceil(this.blocks.length / Blockchain.DIFFICULTY_FACTOR) + 1
   }
 
-  addTransaction(): void {}
+  addTransaction({ timestamp }: { timestamp: number }): void {
+    console.log(timestamp)
+    if (timestamp === 99) {
+      throw new ValidationError('Invalid transaction data')
+    }
+  }
 
-  addBlock(): void {}
+  addBlock({ index }: { index: number }): void {
+    if (index === -1) {
+      throw new ValidationError('Invalid mocked block')
+    }
+  }
 
   isValid(): boolean {
     return true
